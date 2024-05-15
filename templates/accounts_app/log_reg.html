@@ -1,0 +1,124 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" >
+    <title>Welcome Page</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=2">
+</head>
+<body>
+  <div class="wrapper">
+    <div class="rec-prism">
+      <div class="face face-front">
+        <div class="content">
+          <h2>Log in</h2>
+          <form id="login-form" method="POST" action="#">
+            {% csrf_token %}
+            <div class="field-wrapper">
+              <input type="text" name="username" placeholder="username" {% if login_form.username.value %} value="{{ login_form.username.value }}"{% endif %}>
+              <label>E-mail</label>
+              {% for error in login_form.username.errors %}
+                  <span class="error">{{ error }}</span>
+              {% endfor %}
+            </div>
+            <div class="field-wrapper">
+              <input type="password" name="password" placeholder="password" autocomplete="new-password">
+              <label>Password</label>
+              {% for error in login_form.password.errors %}
+                  <span class="error">{{ error }}</span>
+              {% endfor %}
+            </div>
+            {% if is_active is False %}
+              <div class="field-wrapper">
+                <span class="error">Your profile isn't active or password is incorrect. Please contact your administrator.</span>
+              </div>
+            {% endif %}
+            <div class="field-wrapper">
+              <input type="submit" name="login" value="Log in">
+            </div>
+          </form>
+          <span class="signup" onclick="showSignup()">Not a user?  Sign up</span>
+        </div>
+      </div>
+      <div class="face face-right">
+        <div class="content">
+          <h2>Sign up</h2>
+          <form method="POST" action="{% url 'reg' %}">
+            {% csrf_token %}
+            <div class="field-wrapper">
+                <input type="text" name="email" placeholder="Email" {% if register_form.email.value %} value="{{ register_form.email.value }}" {% endif %}>
+                <label>Email</label>
+                {% for error in register_form.email.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="field-wrapper">
+              <input type="text" name="first_name" placeholder="First Name" {% if register_form.first_name.value %} value="{{ register_form.first_name.value }}" {% endif %}>
+              <label>First Name</label>
+              {% for error in register_form.first_name.errors %}
+                  <span class="error">{{ error }}</span>
+              {% endfor %}
+          </div>
+            <div class="field-wrapper">
+                <input type="text" name="last_name" placeholder="Last Name" {% if register_form.last_name.value %} value="{{ register_form.last_name.value }}" {% endif %}>
+                <label>Last Name</label>
+                {% for error in register_form.last_name.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="field-wrapper">
+                <input type="text" name="personal_number" placeholder="Personal Number" {% if register_form.personal_number.value %} value="{{ register_form.personal_number.value }}" {% endif %}>
+                <label>Personal Number</label>
+                {% for error in register_form.personal_number.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="field-wrapper">
+                <input type="date"  name="birth_date" placeholder="Birth Date" {% if register_form.birth_date.value %} value="{{ register_form.birth_date.value }}" {% endif %}>
+                <label>Birth Date</label>
+                {% for error in register_form.birth_date.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="field-wrapper">
+                <input type="password" name="password1" placeholder="Password" >
+                <label>Password</label>
+                {% for error in register_form.password1.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="field-wrapper">
+                <input type="password" name="password2" placeholder="Confirm Password">
+                <label>Confirm Password</label>
+                {% for error in register_form.password2.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="field-wrapper">
+                <input type="submit" name="register" value="Sign up">
+            </div>
+        </form>
+          <span class="singin" onclick="showLogin()">Already a user?  Log in</span>
+        </div>
+      </div>
+      <div class="face face-bottom">
+        <div class="content">
+          <div class="thank-you-msg">
+            Redirecting...  
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <p>Created by Dimitri Katranidis for TBC Academy</p>
+  </footer>
+  <script src="{% static 'js/script.js' %}"></script>
+  {% if register_form.is_bound %}
+  <script>
+    showSignup();
+  </script>
+  {% endif %}
+</body>
+</html>
