@@ -44,8 +44,17 @@ class Book(models.Model):
     title = models.CharField(max_length=100, null=False, blank=False, verbose_name=_('Book Title'))
     published_date = models.DateField(null=False, blank=False, verbose_name=_('Published Date'))
     stock = models.PositiveIntegerField(default=0, verbose_name=_('Stock'), help_text=_('Number of books'))
+
     # borrowed_books = models.PositiveIntegerField(default=0, verbose_name=_('Borrowed Books'),
     #                                              help_text=_('Number of borrowed books'))
+    # reservation_books = models.PositiveIntegerField(default=0, verbose_name=_('Reservation Books'),
+    #                                                 help_text=_('Number of reservation books'))
+
+    # def borrowed_books(self):
+    #     return self.borrows.filter(borrowed_status='borrowed').count()
+    #
+    # def reservation_books(self):
+    #     return self.borrows.filter(borrowed_status='pending').count()
 
     class Meta:
         verbose_name = _("Book")
@@ -54,12 +63,6 @@ class Book(models.Model):
 
     def __str__(self):
         return self.title
-
-    def borrowed_books(self):
-        return self.borrows.filter(borrowed_status='borrowed').count()
-
-    def reservation_books(self):
-        return self.borrows.filter(borrowed_status='pending').count()
 
 
 class BooksBorrow(models.Model):

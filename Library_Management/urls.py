@@ -22,3 +22,7 @@ urlpatterns = [
     path("__debug__/", include("debug_toolbar.urls")),
     path("", include("accounts_app.urls")),
 ]
+
+
+admin.site.index_title = "Bookstore"
+admin.site.site_header = "Bookstore Administration"

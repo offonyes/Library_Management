@@ -38,6 +38,7 @@ INSTALLED_APPS = [
 
     "debug_toolbar",
     "admin_auto_filters",
+    'django_admin_inline_paginator',
 
     "accounts_app",
     "library_app",
