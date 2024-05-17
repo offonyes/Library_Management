@@ -8,6 +8,8 @@ from django_admin_inline_paginator.admin import TabularInlinePaginated
 from library_app.models import Book, Author, Genre, BooksBorrow
 from library_app.filters import AuthorsFilter, GenresFilter, BooksFilter, BorrowersFilter
 
+from accounts_app.models import CustomUser
+
 
 # Register your models here.
 
@@ -29,8 +31,8 @@ class AuthorAdmin(admin.ModelAdmin):
 class BooksInline(TabularInlinePaginated):
     model = BooksBorrow
     verbose_name = _('Book History')
-    per_page = 10
     verbose_name_plural = _('Book Histories')
+    per_page = 10
     extra = 0
     autocomplete_fields = ['book', 'borrower']
     fieldsets = (
@@ -39,7 +41,6 @@ class BooksInline(TabularInlinePaginated):
         ('Status', {'fields': ('borrowed_status',)}),
         ('Return', {'fields': ('return_date',)})
     )
-    prefetch_related = ('book', 'borrower')
 
 
 @admin.register(Book)
@@ -53,14 +54,14 @@ class BookAdmin(admin.ModelAdmin):
     search_fields = ['title', 'authors__name', 'genres__name']
     fieldsets = (
         ("Book Information", {'fields': (('title', 'published_date'), ('authors', 'genres'), 'stock'),
-                              'classes': ('wide',)}),
+                              'classes': ('extra',)}),
         ("Book Stats", {'fields': (('reservation_books', 'borrowed_books'), 'borrowed_count'),
-                        'classes': ('wide',)})
+                        "classes": ("wide",)})
 
     )
 
     def get_queryset(self, request):
-        qs = super(BookAdmin, self).get_queryset(request)
+        qs = super(BookAdmin, self).get_queryset(request).prefetch_related("genres")
         qs = qs.annotate(
             borrowed_books=Count('borrows', filter=Q(borrows__borrowed_status='borrowed')),
             reservation_books=Count('borrows', filter=Q(borrows__borrowed_status='pending')),
@@ -87,7 +88,7 @@ class BookAdmin(admin.ModelAdmin):
 
 @admin.register(BooksBorrow)
 class BooksBorrowAdmin(admin.ModelAdmin):
-    list_display = ['book', 'borrower', 'borrowed_date']
+    list_display = ['book', 'borrower', 'borrowed_date', 'borrowed_status']
     fieldsets = (
         ('Information', {'fields': (('book', 'borrower'), 'borrowed_date'),
                          'classes': ('wide',)}),
@@ -99,4 +100,4 @@ class BooksBorrowAdmin(admin.ModelAdmin):
     list_filter = [BooksFilter, BorrowersFilter, ('borrowed_date', DateFieldListFilter)]
     readonly_fields = ['borrowed_date']
     autocomplete_fields = ['book', 'borrower']
-    prefetch_related = ('book', 'borrower')
+    # prefetch_related = ('book', 'borrower')

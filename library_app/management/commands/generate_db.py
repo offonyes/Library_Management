@@ -1,5 +1,5 @@
 from django.db.utils import IntegrityError
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from library_app.models import Book, Author, Genre
 import csv
 import re
@@ -33,9 +33,11 @@ class Command(BaseCommand):
                 book = Book.objects.create(
                     title=title,
                     published_date=published_date,
-                    stock=random.randint(0, 15),
+                    stock=random.randint(1, 15),
                 )
                 for genre in genres:
+                    if genre == 'none':
+                        continue
                     try:
                         genre_obj = Genre.objects.create(name=genre)
                     except IntegrityError as e:

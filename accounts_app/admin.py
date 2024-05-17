@@ -19,13 +19,13 @@ class CustomUserAdmin(UserAdmin):
                            "classes": ("collapse",),
                            "description": "Personal information about user"}),
         ("Permissions",
-         {"fields": ("is_staff", "groups", "user_permissions"),
+         {"fields": (("is_active", "is_staff"), "groups", "user_permissions"),
           "classes": ("collapse",)},),
     )
     add_fieldsets = (
         ("Account Information", {"fields": ("email", "password1", "password2",), "classes": ("wide",)}),
         ("Personal Info", {"fields": (("first_name", "last_name"), ("personal_number", "birth_date"))}),
-        ("Permissions", {"fields": ("is_staff", "groups", "user_permissions")},)
+        ("Permissions", {"fields": (("is_active", "is_staff"), "groups", "user_permissions")},)
     )
     search_fields = ["email", "first_name", "last_name", "personal_number"]
     ordering = ["email"]

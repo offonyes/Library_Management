@@ -1,5 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 from library_app.choice import STATUS_TYPE
 
@@ -38,23 +40,21 @@ class Author(models.Model):
         return self.books.all()
 
 
+def current_year():
+    return timezone.now().year
+
+
+def max_value_current_year(value):
+    return MaxValueValidator(current_year())(value)
+
+
 class Book(models.Model):
     authors = models.ManyToManyField(Author, related_name="books", verbose_name=_('Authors'))
     genres = models.ManyToManyField(Genre, related_name="books", verbose_name=_('Genres'))
     title = models.CharField(max_length=100, null=False, blank=False, verbose_name=_('Book Title'))
-    published_date = models.DateField(null=False, blank=False, verbose_name=_('Published Date'))
+    published_date = models.IntegerField(validators=[MinValueValidator(1800), max_value_current_year],
+                                         null=False, blank=False, verbose_name=_('Published Date'))
     stock = models.PositiveIntegerField(default=0, verbose_name=_('Stock'), help_text=_('Number of books'))
-
-    # borrowed_books = models.PositiveIntegerField(default=0, verbose_name=_('Borrowed Books'),
-    #                                              help_text=_('Number of borrowed books'))
-    # reservation_books = models.PositiveIntegerField(default=0, verbose_name=_('Reservation Books'),
-    #                                                 help_text=_('Number of reservation books'))
-
-    # def borrowed_books(self):
-    #     return self.borrows.filter(borrowed_status='borrowed').count()
-    #
-    # def reservation_books(self):
-    #     return self.borrows.filter(borrowed_status='pending').count()
 
     class Meta:
         verbose_name = _("Book")

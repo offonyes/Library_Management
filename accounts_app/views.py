@@ -33,7 +33,7 @@ def login_register(request):
             register_form = RegisterForm(request.POST)
             if register_form.is_valid():
                 user = register_form.save(commit=False)
-                user.is_active = False
+                # user.is_active = False
                 user.save()
                 # activateEmail()
                 return render(request, "index.html")
