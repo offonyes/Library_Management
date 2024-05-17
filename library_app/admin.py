@@ -64,7 +64,7 @@ class BookAdmin(admin.ModelAdmin):
             borrowed_count=Count('borrows',
                                  filter=Q(borrows__borrowed_status='returned') | Q(borrows__borrowed_status='borrowed'))
         )
-        return qs
+        return qs.order_by('-borrowed_count')
 
     def borrowed_books(self, obj):
         return obj.borrowed_books
