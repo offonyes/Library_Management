@@ -50,7 +50,8 @@ def max_value_current_year(value):
 
 class Book(models.Model):
     authors = models.ManyToManyField(Author, related_name="books", verbose_name=_('Authors'))
-    genres = models.ManyToManyField(Genre, related_name="books", verbose_name=_('Genres'))
+    genres = models.ManyToManyField(Genre, related_name="books", verbose_name=_('Genres'),
+                                    blank=True, null=True)
     title = models.CharField(max_length=100, null=False, blank=False, verbose_name=_('Book Title'))
     published_date = models.IntegerField(validators=[MinValueValidator(1800), max_value_current_year],
                                          null=False, blank=False, verbose_name=_('Published Date'))
@@ -71,7 +72,7 @@ class BooksBorrow(models.Model):
                                  on_delete=models.CASCADE)
     borrowed_date = models.DateTimeField(auto_now_add=True, verbose_name=_('Borrowed Date'),
                                          help_text=_('Creates automatically'))
-    borrowed_status = models.CharField(max_length=10, choices=STATUS_TYPE, default='pending',
+    borrowed_status = models.CharField(max_length=50, choices=STATUS_TYPE, default='pending',
                                        verbose_name=_('Borrowed Status'))
     return_date = models.DateTimeField(null=True, blank=True, verbose_name=_('Return Date'),
                                        help_text=_('Date/time of returning borrowed book'))

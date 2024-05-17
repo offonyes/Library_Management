@@ -2,16 +2,12 @@ from django.contrib import admin
 from django.contrib.admin import DateFieldListFilter
 from django.db.models import Count, Q
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 
 from django_admin_inline_paginator.admin import TabularInlinePaginated
 
 from library_app.models import Book, Author, Genre, BooksBorrow
 from library_app.filters import AuthorsFilter, GenresFilter, BooksFilter, BorrowersFilter
-
-from accounts_app.models import CustomUser
-
-
-# Register your models here.
 
 
 @admin.register(Genre)
@@ -64,7 +60,7 @@ class BookAdmin(admin.ModelAdmin):
         qs = super(BookAdmin, self).get_queryset(request).prefetch_related("genres")
         qs = qs.annotate(
             borrowed_books=Count('borrows', filter=Q(borrows__borrowed_status='borrowed')),
-            reservation_books=Count('borrows', filter=Q(borrows__borrowed_status='pending')),
+            reservation_books=Count('borrows', filter=Q(borrows__borrowed_status='reserved')),
             borrowed_count=Count('borrows',
                                  filter=Q(borrows__borrowed_status='returned') | Q(borrows__borrowed_status='borrowed'))
         )
@@ -88,7 +84,7 @@ class BookAdmin(admin.ModelAdmin):
 
 @admin.register(BooksBorrow)
 class BooksBorrowAdmin(admin.ModelAdmin):
-    list_display = ['book', 'borrower', 'borrowed_date', 'borrowed_status']
+    list_display = ['book', 'borrower', 'borrowed_date', 'borrowed_status', 'return_date']
     fieldsets = (
         ('Information', {'fields': (('book', 'borrower'), 'borrowed_date'),
                          'classes': ('wide',)}),
@@ -101,3 +97,8 @@ class BooksBorrowAdmin(admin.ModelAdmin):
     readonly_fields = ['borrowed_date']
     autocomplete_fields = ['book', 'borrower']
     # prefetch_related = ('book', 'borrower')
+
+    def save_model(self, request, obj, form, change):
+        if obj.borrowed_status == 'returned':
+            obj.return_date = timezone.now()
+        super().save_model(request, obj, form, change)

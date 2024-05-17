@@ -7,7 +7,9 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView
 )
 
-from .views import BookViewSet, GenreViewSet, AuthorViewSet
+from library_app.views import (BookViewSet, GenreViewSet, AuthorViewSet,
+                               TopBooksView, TopBooksLateReturnsView,
+                               TopUsersLateReturnsView, BorrowCountLastYearView)
 
 router = DefaultRouter()
 router.register(r'books', BookViewSet)
@@ -23,4 +25,8 @@ urlpatterns = [
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path('api/top/books/', TopBooksView.as_view(), name='topbooks'),
+    path('api/top/late/books/', TopBooksLateReturnsView.as_view(), name='toplatebooks'),
+    path('api/top/late/users/', TopUsersLateReturnsView.as_view(), name='toplateusers'),
+    path('api/last_year_count', BorrowCountLastYearView.as_view(), name='lastyearcount')
 ]
