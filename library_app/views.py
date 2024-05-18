@@ -4,6 +4,7 @@ from django.db.models import Count, Q, F
 from django.utils import timezone
 from rest_framework import viewsets, permissions, filters, generics
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.pagination import PageNumberPagination
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
@@ -13,11 +14,18 @@ from library_app.serializers import BookSerializer, AuthorSerializer, GenreSeria
     TopBooksLateReturnsSerializer, TopUsersLateReturnsSerializer, BorrowCountLastYearSerializer
 
 
+class BookPagination(PageNumberPagination):
+    page_size = 2
+    page_size_query_param = 'page_size'
+    # max_page_size = 2
+
+
 class MyViewSet(viewsets.ModelViewSet):
     authentication_classes = (SessionAuthentication, BasicAuthentication, JWTAuthentication)
     filter_backends = (filters.SearchFilter, filters.OrderingFilter)
     ordering = ['id']
     search_fields = ['title']
+    pagination_class = BookPagination
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:

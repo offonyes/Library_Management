@@ -51,7 +51,7 @@ def max_value_current_year(value):
 class Book(models.Model):
     authors = models.ManyToManyField(Author, related_name="books", verbose_name=_('Authors'))
     genres = models.ManyToManyField(Genre, related_name="books", verbose_name=_('Genres'),
-                                    blank=True, null=True)
+                                    blank=True)
     title = models.CharField(max_length=100, null=False, blank=False, verbose_name=_('Book Title'))
     published_date = models.IntegerField(validators=[MinValueValidator(1800), max_value_current_year],
                                          null=False, blank=False, verbose_name=_('Published Date'))
