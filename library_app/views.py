@@ -6,18 +6,17 @@ from rest_framework import viewsets, permissions, filters, generics
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.pagination import PageNumberPagination
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema
 
 from accounts_app.models import CustomUser
-from library_app.models import Book, Author, Genre, BooksBorrow
+from library_app.models import Book, Author, Genre
 from library_app.serializers import BookSerializer, AuthorSerializer, GenreSerializer, TopBooksSerializer, \
     TopBooksLateReturnsSerializer, TopUsersLateReturnsSerializer, BorrowCountLastYearSerializer
 
 
 class BookPagination(PageNumberPagination):
-    page_size = 2
+    page_size = 5
     page_size_query_param = 'page_size'
-    # max_page_size = 2
 
 
 class MyViewSet(viewsets.ModelViewSet):
@@ -41,6 +40,13 @@ class BookViewSet(MyViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     search_fields = ['id', 'title', 'authors__name', 'genres__name']
+    ordering = ['borrow_count']
+
+    def get_queryset(self):
+        qs = Book.objects.annotate(
+            borrow_count=Count('borrows',
+                               filter=Q(borrows__borrowed_status='returned') | Q(borrows__borrowed_status='borrowed')))
+        return qs
 
 
 @extend_schema(tags=['Genres'], description='Retrieve a list of genres. You can search for genres by title.')
@@ -61,7 +67,8 @@ class TopBooksView(generics.ListAPIView):
 
     def get_queryset(self):
         qs = Book.objects.annotate(
-            borrow_count=Count('borrows', filter=Q(borrows__borrowed_status='returned') | Q(borrows__borrowed_status='borrowed')))
+            borrow_count=Count('borrows',
+                               filter=Q(borrows__borrowed_status='returned') | Q(borrows__borrowed_status='borrowed')))
         qs = qs.order_by('-borrow_count')[:10]
         return qs
 

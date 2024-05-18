@@ -17,13 +17,15 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class BookSerializer(serializers.ModelSerializer):
+    borrow_count = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = Book
-        fields = ['id', 'title', 'authors', 'genres', 'published_date']
+        fields = ['id', 'title', 'authors', 'genres', 'published_date', 'borrow_count']
 
-    def to_representation(self, instance):
-        instance = Book.objects.prefetch_related('authors', 'genres').get(pk=instance.pk)
-        return super().to_representation(instance)
+    # def to_representation(self, instance):
+    #     instance = Book.objects.prefetch_related('authors', 'genres').get(pk=instance.pk)
+    #     return super().to_representation(instance)
 
 
 class TopBooksSerializer(serializers.ModelSerializer):
