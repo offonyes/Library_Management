@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.db.models import Count, Q, F
+from django.shortcuts import render
 from django.utils import timezone
 from rest_framework import viewsets, permissions, filters, generics
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
@@ -12,6 +13,10 @@ from accounts_app.models import CustomUser
 from library_app.models import Book, Author, Genre
 from library_app.serializers import BookSerializer, AuthorSerializer, GenreSerializer, TopBooksSerializer, \
     TopBooksLateReturnsSerializer, TopUsersLateReturnsSerializer, BorrowCountLastYearSerializer
+
+
+def index(request):
+    return render(request, template_name='index.html')
 
 
 class BookPagination(PageNumberPagination):

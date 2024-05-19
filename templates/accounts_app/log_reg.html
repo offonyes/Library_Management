@@ -16,14 +16,14 @@
           <form id="login-form" method="POST" action="#">
             {% csrf_token %}
             <div class="field-wrapper">
-              <input type="text" name="username" placeholder="username" {% if login_form.username.value %} value="{{ login_form.username.value }}"{% endif %}>
+              <input type="text" name="email" placeholder="email" id="email" {% if login_form.email.value %} value="{{ login_form.email.value }}"{% endif %}>
               <label>E-mail</label>
-              {% for error in login_form.username.errors %}
+              {% for error in login_form.email.errors %}
                   <span class="error">{{ error }}</span>
               {% endfor %}
             </div>
             <div class="field-wrapper">
-              <input type="password" name="password" placeholder="password" autocomplete="new-password">
+              <input type="password" name="password" placeholder="password" id="password" autocomplete="new-password">
               <label>Password</label>
               {% for error in login_form.password.errors %}
                   <span class="error">{{ error }}</span>
@@ -114,6 +114,8 @@
   <footer>
     <p>Created by Dimitri Katranidis for TBC Academy</p>
   </footer>
+  <script type="module" src="{% static 'js/token_handler.js' %}"></script>
+  <script type="module" src="{% static 'js/auth.js' %}"></script>
   <script src="{% static 'js/script.js' %}"></script>
   {% if register_form.is_bound %}
   <script>

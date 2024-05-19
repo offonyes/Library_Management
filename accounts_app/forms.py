@@ -6,16 +6,16 @@ from django.core.validators import validate_email
 
 
 class LoginForm(forms.Form):
-    username = forms.EmailField(max_length=100)
+    email = forms.EmailField(max_length=100)
     password = forms.CharField(widget=forms.PasswordInput)
 
     def clean_username(self):
-        username = self.cleaned_data["username"]
+        email = self.cleaned_data["email"]
         try:
-            validate_email(username)
+            validate_email(email)
         except ValidationError:
             raise ValidationError("Please enter a valid email address.")
-        return username
+        return email
 
     def clean_password(self):
         password = self.cleaned_data["password"]

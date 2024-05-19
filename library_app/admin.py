@@ -49,7 +49,7 @@ class BookAdmin(admin.ModelAdmin):
     list_per_page = 25
     search_fields = ['title', 'authors__name', 'genres__name']
     fieldsets = (
-        ("Book Information", {'fields': (('title', 'published_date'), ('authors', 'genres'), 'stock'),
+        ("Book Information", {'fields': (('title', 'published_date'), ('authors', 'genres'), 'image_link', 'stock'),
                               'classes': ('extra',)}),
         ("Book Stats", {'fields': (('reservation_books', 'borrowed_books'), 'borrowed_count'),
                         "classes": ("wide",)})

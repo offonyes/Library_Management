@@ -10,30 +10,36 @@ class Command(BaseCommand):
     help = 'Generates book, genre and author database'
 
     def handle(self, *args, **kwargs):
-        csv_file = "google_books_1299.csv"
+        csv_file = "data.csv"
 
         with open(csv_file, newline='', encoding='utf-8') as file:
             csvreader = csv.reader(file)
 
             headers = next(csvreader)
             title_index = headers.index('title')
-            authors_index = headers.index('author')
-            genres_index = headers.index('generes')
-            published_date_index = headers.index('published_date')
+            authors_index = headers.index('authors')
+            genres_index = headers.index('categories')
+            thumbnail = headers.index('thumbnail')
+            published_date_index = headers.index('published_year')
 
-            for row in csvreader:
+            for num, row in enumerate(csvreader):
+                if num == 1000:
+                    break
                 title = row[title_index]
-                categorys = row[genres_index]
-                author = row[authors_index]
-                published_date = row[published_date_index][-4:]
+                categories = row[genres_index]
+                authors = row[authors_index]
+                published_date = row[published_date_index]
+                image = row[thumbnail]
 
                 genres = []
-
-                genres.extend([genre.strip() for genre in re.split('&|amp|,', categorys) if genre.strip()])
+                author = []
+                genres.extend([genre.strip() for genre in re.split('&|amp|;', categories) if genre.strip()])
+                author.extend([author.strip() for author in re.split('&|amp|;', authors) if author.strip()])
                 book = Book.objects.create(
                     title=title,
                     published_date=published_date,
                     stock=random.randint(1, 15),
+                    image_link=image
                 )
                 for genre in genres:
                     if genre == 'none':
@@ -43,10 +49,13 @@ class Command(BaseCommand):
                     except IntegrityError as e:
                         genre_obj = Genre.objects.get(name=genre)
                     book.genres.add(genre_obj)
-                try:
-                    autho_obj = Author.objects.create(name=author)
-                except IntegrityError as e:
-                    autho_obj = Author.objects.get(name=author)
-                book.authors.add(autho_obj)
+                for autho in author:
+                    if autho == 'none':
+                        continue
+                    try:
+                        autho_obj = Author.objects.create(name=autho)
+                    except IntegrityError as e:
+                        autho_obj = Author.objects.get(name=autho)
+                    book.authors.add(autho_obj)
 
         self.stdout.write("Done")

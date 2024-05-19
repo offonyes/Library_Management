@@ -1,11 +1,10 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Library Home</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles1.css' %}">
 </head>
 <body>
     <header>
@@ -52,16 +51,16 @@
 
         <section class="popular-books">
             <h2>Popular Books</h2>
-            <div class="books-grid" id="books-container">
-{#                {% for book in popular_books %}#}
-{#                <div class="book-card">#}
-{#                    <img src="{{ book.cover_url }}" alt="{{ book.title }}">#}
-{#                    <div class="book-info">#}
-{#                        <h3>{{ book.title }}</h3>#}
-{#                        <p>{{ book.author }}</p>#}
-{#                    </div>#}
-{#                </div>#}
-{#                {% endfor %}#}
+            <div class="books-grid">
+                {% for book in popular_books %}
+                <div class="book-card">
+                    <img src="{{ book.cover_url }}" alt="{{ book.title }}">
+                    <div class="book-info">
+                        <h3>{{ book.title }}</h3>
+                        <p>{{ book.author }}</p>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </section>
     </main>
@@ -70,6 +69,6 @@
         <p>&copy; 2024 Library. All rights reserved.</p>
     </footer>
 
-    <script src="{% static 'js/script1.js' %}"></script>
+    <script src="{% static 'js/script.js' %}"></script>
 </body>
 </html>

@@ -21,7 +21,7 @@ class BookSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Book
-        fields = ['id', 'title', 'authors', 'genres', 'published_date', 'borrow_count']
+        fields = ['id', 'title', 'authors', 'genres', 'published_date', 'borrow_count', 'image_link']
 
     # def to_representation(self, instance):
     #     instance = Book.objects.prefetch_related('authors', 'genres').get(pk=instance.pk)

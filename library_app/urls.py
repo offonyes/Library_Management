@@ -9,7 +9,7 @@ from rest_framework_simplejwt.views import (
 
 from library_app.views import (BookViewSet, GenreViewSet, AuthorViewSet,
                                TopBooksView, TopBooksLateReturnsView,
-                               TopUsersLateReturnsView, BorrowCountLastYearView)
+                               TopUsersLateReturnsView, BorrowCountLastYearView, index)
 
 router = DefaultRouter()
 router.register(r'books', BookViewSet)
@@ -17,6 +17,8 @@ router.register(r'genres', GenreViewSet)
 router.register(r'authors', AuthorViewSet)
 
 urlpatterns = [
+    path("index/", index, name='index'),
+
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

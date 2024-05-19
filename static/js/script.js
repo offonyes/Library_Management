@@ -9,3 +9,4 @@ function showLogin(){
 function showThankYou(){
   prism.style.transform = "translateZ(-100px) rotateX( 90deg)";
 }
+
