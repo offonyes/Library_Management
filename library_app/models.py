@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-from library_app.choice import STATUS_TYPE
+from library_app.choice import BORROWS_STATUS_TYPE, RESERVATION_STATUS_TYPE
 
 # Create your models here.
 
@@ -66,13 +66,39 @@ class Book(models.Model):
         return self.title
 
 
-class BooksBorrow(models.Model):
-    book = models.ForeignKey(Book, related_name="borrows", verbose_name=_('Book'), on_delete=models.CASCADE)
-    borrower = models.ForeignKey('accounts_app.CustomUser', related_name="borrows", verbose_name=_('Borrower'),
+class BookReservation(models.Model):
+    book = models.ForeignKey(Book, related_name="reservations", verbose_name=_('Book'), on_delete=models.CASCADE)
+    borrower = models.ForeignKey('accounts_app.CustomUser', related_name="reservations", verbose_name=_('Borrower'),
                                  on_delete=models.CASCADE)
+    reserved_date = models.DateTimeField(auto_now_add=True, verbose_name=_('Reserved Date'),
+                                         help_text=_('Creates automatically'))
+    expiration_date = models.DateTimeField(null=True, blank=True, verbose_name=_('Expiration Date'),
+                                           help_text=_('Date/time when reservation expires'))
+    reservation_status = models.CharField(max_length=50, choices=RESERVATION_STATUS_TYPE, default='reserved',
+                                          verbose_name=_('Reservation Status'))
+
+    class Meta:
+        verbose_name = _("Book Reservation")
+        verbose_name_plural = _("Book Reservations")
+        ordering = ['-reserved_date']
+
+    def save(self, *args, **kwargs):
+        if not self.expiration_date and self.reservation_status == 'reserved':
+            self.expiration_date = timezone.now() + timezone.timedelta(days=1)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.book.title} - {self.borrower.email} | {self.reserved_date}"
+
+
+class BooksBorrow(models.Model):
+    book = models.ForeignKey(Book, related_name="borrows", verbose_name=_('Book'), on_delete=models.CASCADE,
+                             blank=True)
+    borrower = models.ForeignKey('accounts_app.CustomUser', related_name="borrows", verbose_name=_('Borrower'),
+                                 on_delete=models.CASCADE, blank=True)
     borrowed_date = models.DateTimeField(auto_now_add=True, verbose_name=_('Borrowed Date'),
                                          help_text=_('Creates automatically'))
-    borrowed_status = models.CharField(max_length=50, choices=STATUS_TYPE, default='pending',
+    borrowed_status = models.CharField(max_length=50, choices=BORROWS_STATUS_TYPE, default='borrowed',
                                        verbose_name=_('Borrowed Status'))
     return_date = models.DateTimeField(null=True, blank=True, verbose_name=_('Return Date'),
                                        help_text=_('Date/time of returning borrowed book'))
