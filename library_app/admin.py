@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from django_admin_inline_paginator.admin import TabularInlinePaginated
 
+from library_app.forms import BookReservationForm, BooksBorrowForm
 from library_app.models import Book, Author, Genre, BooksBorrow, BookReservation
 from library_app.filters import AuthorsFilter, GenresFilter, BooksFilter, BorrowersFilter
 
@@ -91,6 +92,7 @@ class BookAdmin(admin.ModelAdmin):
 
 @admin.register(BookReservation)
 class BookReservationAdmin(admin.ModelAdmin):
+    form = BookReservationForm
     list_display = ['book', 'borrower', 'reservation_status']
     fieldsets = [
         ('Information', {
@@ -101,13 +103,37 @@ class BookReservationAdmin(admin.ModelAdmin):
             'fields': ('reservation_status',)
         })
     ]
-    list_filter = [BooksFilter, BorrowersFilter, ('reserved_date', DateFieldListFilter)]
+    list_filter = [BooksFilter, BorrowersFilter, ('reserved_date', DateFieldListFilter), 'reservation_status']
     readonly_fields = ['reserved_date', 'expiration_date']
     autocomplete_fields = ['book', 'borrower']
+    actions = ['mark_as_picked_up']
+
+    def mark_as_picked_up(self, request, queryset):
+        for reservation in queryset:
+            if reservation.reservation_status == 'reserved':
+                reservation.process_pickup()
+        self.message_user(request, "Selected reservations have been marked as picked up and borrow records created.")
+
+    mark_as_picked_up.short_description = "Mark selected reservations as picked up"
+
+    def save_model(self, request, obj, form, change):
+        if change:
+            previous_status = BookReservation.objects.get(pk=obj.pk).reservation_status
+            if previous_status != 'picked_up' and obj.reservation_status == 'picked_up':
+                BooksBorrow.objects.create(
+                    book=obj.book,
+                    borrower=obj.borrower,
+                    borrowed_status='borrowed'
+                )
+                self.message_user(request, "Selected reservation have been marked as picked"
+                                           " up and borrow records created.")
+
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(BooksBorrow)
 class BooksBorrowAdmin(admin.ModelAdmin):
+    form = BooksBorrowForm
     list_display = ['book', 'borrower', 'borrowed_date', 'borrowed_status', 'return_date']
     fieldsets = (
         ('Information', {'fields': (('book', 'borrower'), 'borrowed_date'),
@@ -117,7 +143,7 @@ class BooksBorrowAdmin(admin.ModelAdmin):
                     'classes': ('collapse',)})
 
     )
-    list_filter = [BooksFilter, BorrowersFilter, ('borrowed_date', DateFieldListFilter)]
+    list_filter = [BooksFilter, BorrowersFilter, ('borrowed_date', DateFieldListFilter), 'borrowed_status']
     readonly_fields = ['borrowed_date']
     autocomplete_fields = ['book', 'borrower']
 

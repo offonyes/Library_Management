@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -89,6 +89,21 @@ class BookReservation(models.Model):
 
     def __str__(self):
         return f"{self.book.title} - {self.borrower.email} | {self.reserved_date}"
+
+    @transaction.atomic
+    def process_pickup(self):
+        if self.reservation_status == 'reserved':
+            self.reservation_status = 'picked_up'
+            self.save()
+
+            borrow = BooksBorrow.objects.create(
+                book=self.book,
+                borrower=self.borrower,
+                borrowed_status='borrowed'
+            )
+
+            self.borrow = borrow
+            self.save()
 
 
 class BooksBorrow(models.Model):
