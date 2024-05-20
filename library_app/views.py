@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.db.models import Count, Q, F
 from django.shortcuts import render
 from django.utils import timezone
-from rest_framework import viewsets, permissions, filters, generics, status
+from rest_framework import viewsets, permissions, filters, generics, status, serializers
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -87,7 +87,8 @@ class TopUsersLateReturnsView(generics.ListAPIView):
 
     def get_queryset(self):
         return CustomUser.objects.annotate(
-            late_return_count=Count('borrows', filter=Q(borrows__return_date__gt=F('borrows__borrowed_date') + timedelta(days=10)))
+            late_return_count=Count('borrows',
+                                    filter=Q(borrows__return_date__gt=F('borrows__borrowed_date') + timedelta(days=10)))
         ).order_by('-late_return_count')[:100]
 
 
@@ -97,7 +98,8 @@ class TopBooksLateReturnsView(generics.ListAPIView):
 
     def get_queryset(self):
         return Book.objects.annotate(
-            late_return_count=Count('borrows', filter=Q(borrows__return_date__gt=F('borrows__borrowed_date') + timedelta(days=10)))
+            late_return_count=Count('borrows',
+                                    filter=Q(borrows__return_date__gt=F('borrows__borrowed_date') + timedelta(days=10)))
         ).order_by('-late_return_count')[:100]
 
 
@@ -108,7 +110,7 @@ class BorrowCountLastYearView(generics.ListAPIView):
     def get_queryset(self):
         last_year = timezone.now() - timedelta(days=365)
         qs = Book.objects.annotate(
-            borrow_count=Count('borrows', filter=Q(borrows__borrowed_date__gte=last_year)) )
+            borrow_count=Count('borrows', filter=Q(borrows__borrowed_date__gte=last_year)))
         return qs
 
 
@@ -128,10 +130,35 @@ class BookReservationView(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return BookReservation.objects.filter(borrower=self.request.user,
-                                              reservation_status__in=['reserved'])
+                                              reservation_status__in=['reserved', 'wishlist'])
+
+    def perform_create(self, serializer):
+        book = serializer.validated_data['book']
+        user = self.request.user
+        if book is None:
+            raise serializers.ValidationError({'error': 'This book does not exist'})
+
+        if user.borrows.filter(borrowed_status='borrowed').count() >= 5:
+            print('This book is already borrowed')
+            raise serializers.ValidationError({'detail': 'You already have an active 5 reservation. '
+                                                         'Please complete or cancel it before making'
+                                                         ' a new reservation.'}, code='invalid')
+        if user.reservations.filter(reservation_status='reserved').count() >= 5:
+            print('This book is already reserved')
+            raise serializers.ValidationError({'detail': 'You already have an active 5 reservation. '
+                                                         'Please complete or cancel it before making'
+                                                         ' a new reservation.'}, code='invalid')
+
+        borrowed_count = book.borrows.filter(borrowed_status='borrowed').count()
+        reserved_count = book.reservations.filter(reservation_status='reserved').count()
+        if (borrowed_count + reserved_count) >= book.stock:
+            print('This book is already not available')
+            raise serializers.ValidationError({'detail': 'Not enough books available. You can add to wishlist.'})
+
+        serializer.save(borrower=user)
 
     @action(detail=True, methods=['post'])
-    def cancel(self, request, pk=None):
+    def cancel(self, request):
         reservation = self.get_object()
         if reservation.reservation_status in ['picked_up', 'reservation_expired', 'reservation_canceled']:
             return Response({'error': 'Reservation is already cancelled or has expired.'},
@@ -151,4 +178,18 @@ class BookReservationView(viewsets.ModelViewSet):
         serializer = self.get_serializer(history_reservations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['post'], url_path='add_wishlist')
+    def add_wishlist(self, request):
+        print(request.data['book'])
+        book = Book.objects.get(pk=request.data['book'])
+        if book is not None:
+            wishlist = BookReservation.objects.create(
+                borrower=request.user,
+                book=book,
+                reservation_status='wishlist',
+            )
+            if wishlist is None:
+                return Response({'error': 'ERROR'}, status=status.HTTP_400_BAD_REQUEST)
 
+            return Response({'message': 'Book added to wishlist successfully'}, status=status.HTTP_200_OK)
+        return Response({'error': 'This book does not exist'}, status=status.HTTP_400_BAD_REQUEST)

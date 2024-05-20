@@ -93,7 +93,7 @@ class BookAdmin(admin.ModelAdmin):
 @admin.register(BookReservation)
 class BookReservationAdmin(admin.ModelAdmin):
     form = BookReservationForm
-    list_display = ['book', 'borrower', 'reservation_status']
+    list_display = ['book', 'borrower', 'reserved_date', 'reservation_status']
     fieldsets = [
         ('Information', {
             'fields': (('book', 'borrower'), 'reserved_date', 'expiration_date'),

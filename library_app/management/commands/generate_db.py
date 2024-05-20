@@ -46,7 +46,7 @@ class Command(BaseCommand):
                         continue
                     try:
                         genre_obj = Genre.objects.create(name=genre)
-                    except IntegrityError as e:
+                    except IntegrityError:
                         genre_obj = Genre.objects.get(name=genre)
                     book.genres.add(genre_obj)
                 for autho in author:
@@ -54,7 +54,7 @@ class Command(BaseCommand):
                         continue
                     try:
                         autho_obj = Author.objects.create(name=autho)
-                    except IntegrityError as e:
+                    except IntegrityError:
                         autho_obj = Author.objects.get(name=autho)
                     book.authors.add(autho_obj)
 
