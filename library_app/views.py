@@ -3,16 +3,19 @@ from datetime import timedelta
 from django.db.models import Count, Q, F
 from django.shortcuts import render
 from django.utils import timezone
-from rest_framework import viewsets, permissions, filters, generics
+from rest_framework import viewsets, permissions, filters, generics, status
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from drf_spectacular.utils import extend_schema
 
 from accounts_app.models import CustomUser
-from library_app.models import Book, Author, Genre
+from library_app.models import Book, Author, Genre, BookReservation
 from library_app.serializers import BookSerializer, AuthorSerializer, GenreSerializer, TopBooksSerializer, \
-    TopBooksLateReturnsSerializer, TopUsersLateReturnsSerializer, BorrowCountLastYearSerializer
+    TopBooksLateReturnsSerializer, TopUsersLateReturnsSerializer, BorrowCountLastYearSerializer, \
+    BookReservationSerializer
 
 
 def index(request):
@@ -107,3 +110,45 @@ class BorrowCountLastYearView(generics.ListAPIView):
         qs = Book.objects.annotate(
             borrow_count=Count('borrows', filter=Q(borrows__borrowed_date__gte=last_year)) )
         return qs
+
+
+@extend_schema(tags=['User Management'])
+class BookReservationView(viewsets.ModelViewSet):
+    queryset = BookReservation.objects.all()
+    serializer_class = BookReservationSerializer
+    pagination_class = BookPagination
+    http_method_names = ['get', 'post', 'cancel']
+
+    def get_permissions(self):
+        if self.action not in ['delete']:
+            permission_classes = [permissions.IsAuthenticated]
+        else:
+            permission_classes = [permissions.IsAdminUser]
+        return [permission() for permission in permission_classes]
+
+    def get_queryset(self):
+        return BookReservation.objects.filter(borrower=self.request.user,
+                                              reservation_status__in=['reserved'])
+
+    @action(detail=True, methods=['post'])
+    def cancel(self, request, pk=None):
+        reservation = self.get_object()
+        if reservation.reservation_status in ['picked_up', 'reservation_expired', 'reservation_canceled']:
+            return Response({'error': 'Reservation is already cancelled or has expired.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        reservation.reservation_status = 'reservation_canceled'
+        reservation.save()
+        return Response({'message': 'Reservation cancelled successfully'}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_path='history')
+    def history_reservations(self, request):
+        history_reservations = BookReservation.objects.filter(borrower=request.user)
+        page = self.paginate_queryset(history_reservations)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(history_reservations, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+

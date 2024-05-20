@@ -9,12 +9,14 @@ from rest_framework_simplejwt.views import (
 
 from library_app.views import (BookViewSet, GenreViewSet, AuthorViewSet,
                                TopBooksView, TopBooksLateReturnsView,
-                               TopUsersLateReturnsView, BorrowCountLastYearView, index)
+                               TopUsersLateReturnsView, BorrowCountLastYearView, BookReservationView,
+                               index)
 
 router = DefaultRouter()
 router.register(r'books', BookViewSet)
 router.register(r'genres', GenreViewSet)
 router.register(r'authors', AuthorViewSet)
+router.register(r'reservations', BookReservationView)
 
 urlpatterns = [
     path("index/", index, name='index'),
