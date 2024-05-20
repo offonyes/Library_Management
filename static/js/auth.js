@@ -39,9 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Выполнение защищенного запроса
 // async function fetchProtectedData() {
-//     let accessToken = localStorage.getItem('accessToken'); // или получить из cookies
+//     let accessToken = localStorage.getItem('accessToken'); //
 //
 //     if (!accessToken || isTokenExpired(accessToken)) {
 //         accessToken = await refreshToken();

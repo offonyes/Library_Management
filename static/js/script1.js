@@ -5,9 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch(url)
             .then(response => response.json())
             .then(data => {
-                // Очищаем контейнер перед добавлением новых книг
                 booksContainer.innerHTML = '';
-                // Добавляем каждую книгу в контейнер
                 data.results.forEach(book => {
                     const bookCard = document.createElement('div');
                     bookCard.classList.add('book-card');
@@ -37,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     booksContainer.appendChild(bookCard);
                 });
 
-                // Добавляем кнопку для загрузки предыдущей страницы, если она есть
                 if (data.previous) {
                     const loadPreviousButton = document.createElement('button');
                     loadPreviousButton.textContent = 'Load Previous';
@@ -47,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     booksContainer.appendChild(loadPreviousButton);
                 }
 
-                // Добавляем кнопку для загрузки следующей страницы, если она есть
                 if (data.next) {
                     const loadNextButton = document.createElement('button');
                     loadNextButton.textContent = 'Load Next';
@@ -62,6 +58,5 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    // Начинаем с загрузки первой страницы книг
     fetchBooks('/api/books');
 });
