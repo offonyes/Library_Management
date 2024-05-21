@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch(url)
             .then(response => response.json())
             .then(data => {
-                booksContainer.innerHTML = '';
+                // booksContainer.innerHTML = '';
                 data.results.forEach(book => {
                     const bookCard = document.createElement('div');
                     bookCard.classList.add('book-card');
@@ -35,14 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     booksContainer.appendChild(bookCard);
                 });
 
-                if (data.previous) {
-                    const loadPreviousButton = document.createElement('button');
-                    loadPreviousButton.textContent = 'Load Previous';
-                    loadPreviousButton.addEventListener('click', () => {
-                        fetchBooks(data.previous);
-                    });
-                    booksContainer.appendChild(loadPreviousButton);
-                }
+                // if (data.previous) {
+                //     const loadPreviousButton = document.createElement('button');
+                //     loadPreviousButton.textContent = 'Load Previous';
+                //     loadPreviousButton.addEventListener('click', () => {
+                //         fetchBooks(data.previous);
+                //     });
+                //     booksContainer.appendChild(loadPreviousButton);
+                // }
 
                 if (data.next) {
                     const loadNextButton = document.createElement('button');
@@ -58,5 +58,5 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    fetchBooks('/api/books');
+    fetchBooks('/api/books/?page_size=20');
 });

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from accounts_app.models import CustomUser
-from .models import Book, Genre, Author, BookReservation
+from .models import Book, Genre, Author, BookReservation, BooksBorrow
 
 
 class AuthorSerializer(serializers.ModelSerializer):
@@ -61,3 +61,9 @@ class BookReservationSerializer(serializers.ModelSerializer):
         model = BookReservation
         fields = '__all__'
         read_only_fields = ['expiration_date', 'borrower', 'reservation_status']
+
+
+class BooksBorrowSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BooksBorrow
+        fields = '__all__'

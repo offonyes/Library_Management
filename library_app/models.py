@@ -107,10 +107,9 @@ class BookReservation(models.Model):
 
 
 class BooksBorrow(models.Model):
-    book = models.ForeignKey(Book, related_name="borrows", verbose_name=_('Book'), on_delete=models.CASCADE,
-                             blank=True)
+    book = models.ForeignKey(Book, related_name="borrows", verbose_name=_('Book'), on_delete=models.CASCADE)
     borrower = models.ForeignKey('accounts_app.CustomUser', related_name="borrows", verbose_name=_('Borrower'),
-                                 on_delete=models.CASCADE, blank=True)
+                                 on_delete=models.CASCADE)
     borrowed_date = models.DateTimeField(auto_now_add=True, verbose_name=_('Borrowed Date'),
                                          help_text=_('Creates automatically'))
     borrowed_status = models.CharField(max_length=50, choices=BORROWS_STATUS_TYPE, default='borrowed',

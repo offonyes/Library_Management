@@ -1,5 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
+from django.db.models import Q
+
 from .models import BookReservation, BooksBorrow
 
 
@@ -14,7 +16,8 @@ class BookReservationForm(forms.ModelForm):
         status = cleaned_data.get('reservation_status')
         if book:
             if status == 'reserved':
-                borrowed_count = book.borrows.filter(borrowed_status='borrowed').count()
+                borrowed_count = book.borrows.filter(
+                    Q(borrowed_status='borrowed') | Q(borrowed_status='overdue')).count()
                 reserved_count = book.reservations.filter(reservation_status='reserved').count()
                 total_unavailable = borrowed_count + reserved_count
                 if total_unavailable >= book.stock:
@@ -33,8 +36,9 @@ class BooksBorrowForm(forms.ModelForm):
         book = cleaned_data.get('book')
         status = cleaned_data.get('borrowed_status')
         if book:
-            if status == 'borrowed':
-                borrowed_count = book.borrows.filter(borrowed_status='borrowed').count()
+            if status in ['borrowed', 'overdue']:
+                borrowed_count = book.borrows.filter(
+                    Q(borrowed_status='borrowed') | Q(borrowed_status='overdue')).count()
                 reserved_count = book.reservations.filter(reservation_status='reserved').count()
                 total_unavailable = borrowed_count + reserved_count
                 if total_unavailable >= book.stock:

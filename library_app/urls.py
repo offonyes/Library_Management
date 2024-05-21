@@ -10,6 +10,7 @@ from rest_framework_simplejwt.views import (
 from library_app.views import (BookViewSet, GenreViewSet, AuthorViewSet,
                                TopBooksView, TopBooksLateReturnsView,
                                TopUsersLateReturnsView, BorrowCountLastYearView, BookReservationView,
+                               BooksBorrowHistoryListView, ActiveBooksBorrowListView,
                                index)
 
 router = DefaultRouter()
@@ -19,9 +20,10 @@ router.register(r'authors', AuthorViewSet)
 router.register(r'reservations', BookReservationView)
 
 urlpatterns = [
+    # Page urls
     path("index/", index, name='index'),
 
-    path('api/', include(router.urls)),
+    # Package urls
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
@@ -29,8 +31,13 @@ urlpatterns = [
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+
+    # My api urls
+    path('api/', include(router.urls)),
     path('api/top/books/', TopBooksView.as_view(), name='topbooks'),
     path('api/top/late/books/', TopBooksLateReturnsView.as_view(), name='toplatebooks'),
     path('api/top/late/users/', TopUsersLateReturnsView.as_view(), name='toplateusers'),
-    path('api/last_year_count', BorrowCountLastYearView.as_view(), name='lastyearcount')
+    path('api/last_year_count', BorrowCountLastYearView.as_view(), name='lastyearcount'),
+    path('api/borrows/active', ActiveBooksBorrowListView.as_view(), name='activebooksborrows'),
+    path('api/borrows/history', BooksBorrowHistoryListView.as_view(), name='booksborrowhistory'),
 ]

@@ -30,14 +30,8 @@ class BooksInline(TabularInlinePaginated):
     verbose_name = _('Book History')
     verbose_name_plural = _('Book Histories')
     per_page = 10
-    extra = 0
-    autocomplete_fields = ['book', 'borrower']
-    fieldsets = (
-        ('Information', {'fields': (('book', 'borrower'),),
-                         'classes': ('wide',)}),
-        ('Status', {'fields': ('borrowed_status',)}),
-        ('Return', {'fields': ('return_date',)})
-    )
+    max_num = 0
+    readonly_fields = ['book', 'borrower', 'borrowed_status', 'return_date']
 
     def get_queryset(self, request):
         return super(BooksInline, self).get_queryset(request).select_related(
@@ -52,7 +46,7 @@ class BookAdmin(admin.ModelAdmin):
     autocomplete_fields = ['authors', 'genres']
     list_filter = [AuthorsFilter, GenresFilter]
     list_per_page = 25
-    search_fields = ['title', 'authors__name', 'genres__name']
+    search_fields = ['title']
     fieldsets = (
         ("Book Information", {'fields': (('title', 'published_date'), ('authors', 'genres'), 'image_link', 'stock'),
                               'classes': ('extra',)}),
@@ -65,11 +59,12 @@ class BookAdmin(admin.ModelAdmin):
         qs = super(BookAdmin, self).get_queryset(request).prefetch_related('genres', 'authors')
 
         qs = qs.annotate(
-            borrowed_books=Count('borrows', filter=Q(borrows__borrowed_status='borrowed'), distinct=True),
-            borrowed_count=Count('borrows', filter=Q(borrows__borrowed_status__in=['borrowed', 'returned']),
-                                 distinct=True),
-            reservation_books=Count('reservations', filter=Q(reservations__reservation_status='reserved'),
-                                    distinct=True),
+            borrowed_books=Count('borrows', filter=Q(
+                borrows__borrowed_status__in=['borrowed', 'overdue']), distinct=True),
+            borrowed_count=Count('borrows', filter=Q(
+                borrows__borrowed_status__in=['borrowed', 'returned', 'overdue', 'overdue_returned']), distinct=True),
+            reservation_books=Count('reservations', filter=Q(
+                reservations__reservation_status='reserved'), distinct=True),
         ).order_by('-borrowed_count', '-reservation_books')
 
         return qs
@@ -152,6 +147,6 @@ class BooksBorrowAdmin(admin.ModelAdmin):
             'book', 'borrower')
 
     def save_model(self, request, obj, form, change):
-        if obj.borrowed_status == 'returned':
+        if obj.borrowed_status in ['returned', 'overdue_returned']:
             obj.return_date = timezone.now()
         super().save_model(request, obj, form, change)
