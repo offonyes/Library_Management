@@ -13,14 +13,14 @@ from library_app.filters import AuthorsFilter, GenresFilter, BooksFilter, Borrow
 
 @admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
-    list_display = ['name', 'description']
+    list_display = ['id', 'name', 'description']
     search_fields = ['name']
     list_per_page = 10
 
 
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
-    list_display = ['name', 'description']
+    list_display = ['id', 'name', 'description']
     search_fields = ['name']
     list_per_page = 10
 
@@ -47,7 +47,7 @@ class BooksInline(TabularInlinePaginated):
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
     inlines = [BooksInline]
-    list_display = ['title', 'published_date', 'stock', 'borrowed_books', 'reservation_books', 'borrowed_count']
+    list_display = ['id', 'title', 'published_date', 'stock', 'borrowed_books', 'reservation_books', 'borrowed_count']
     readonly_fields = ['borrowed_books', 'reservation_books', 'borrowed_count']
     autocomplete_fields = ['authors', 'genres']
     list_filter = [AuthorsFilter, GenresFilter]
@@ -93,7 +93,7 @@ class BookAdmin(admin.ModelAdmin):
 @admin.register(BookReservation)
 class BookReservationAdmin(admin.ModelAdmin):
     form = BookReservationForm
-    list_display = ['book', 'borrower', 'reserved_date', 'reservation_status']
+    list_display = ['id', 'book', 'borrower', 'reserved_date', 'reservation_status']
     fieldsets = [
         ('Information', {
             'fields': (('book', 'borrower'), 'reserved_date', 'expiration_date'),
@@ -134,7 +134,7 @@ class BookReservationAdmin(admin.ModelAdmin):
 @admin.register(BooksBorrow)
 class BooksBorrowAdmin(admin.ModelAdmin):
     form = BooksBorrowForm
-    list_display = ['book', 'borrower', 'borrowed_date', 'borrowed_status', 'return_date']
+    list_display = ['id', 'book', 'borrower', 'borrowed_date', 'borrowed_status', 'return_date']
     fieldsets = (
         ('Information', {'fields': (('book', 'borrower'), 'borrowed_date'),
                          'classes': ('wide',)}),

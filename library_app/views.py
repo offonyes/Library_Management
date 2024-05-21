@@ -120,13 +120,16 @@ class BookReservationView(viewsets.ModelViewSet):
     serializer_class = BookReservationSerializer
     pagination_class = BookPagination
     http_method_names = ['get', 'post', 'cancel']
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = (SessionAuthentication, BasicAuthentication, JWTAuthentication)
 
-    def get_permissions(self):
-        if self.action not in ['delete']:
-            permission_classes = [permissions.IsAuthenticated]
-        else:
-            permission_classes = [permissions.IsAdminUser]
-        return [permission() for permission in permission_classes]
+
+    # def get_permissions(self):
+    #     if self.action not in ['delete']:
+    #         permission_classes = [permissions.IsAuthenticated]
+    #     else:
+    #         permission_classes = [permissions.IsAdminUser]
+    #     return [permission() for permission in permission_classes]
 
     def get_queryset(self):
         return BookReservation.objects.filter(borrower=self.request.user,
@@ -140,8 +143,8 @@ class BookReservationView(viewsets.ModelViewSet):
 
         if user.borrows.filter(borrowed_status='borrowed').count() >= 5:
             print('This book is already borrowed')
-            raise serializers.ValidationError({'detail': 'You already have an active 5 reservation. '
-                                                         'Please complete or cancel it before making'
+            raise serializers.ValidationError({'detail': 'You already have an active 5 borrowings. '
+                                                         'Please return it before making'
                                                          ' a new reservation.'}, code='invalid')
         if user.reservations.filter(reservation_status='reserved').count() >= 5:
             print('This book is already reserved')
