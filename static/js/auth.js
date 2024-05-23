@@ -1,14 +1,16 @@
 // auth.js
 
-import { refreshToken } from './token_handler.js';
+// import { refreshToken } from './token_handler.js';
 
 // Отправка формы логина
+document.getElementById('login-form').addEventListener('submit', handleLogin);
+
 async function handleLogin(event) {
     event.preventDefault();
 
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    console.log(email, password)
+    const errorElement = document.getElementById('login-error');
 
     const response = await fetch('/api/token/', {
         method: 'POST',
@@ -28,44 +30,11 @@ async function handleLogin(event) {
 
         window.location.href = '/index';
     } else {
-        console.log('Login failed');
+        const errorData = await response.json();
+        errorElement.innerText = errorData.detail || 'Login failed';
+        errorElement.style.display = 'block';
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.getElementById('login-form');
-    if (loginForm) {
-        loginForm.addEventListener('submit', handleLogin);
-    }
-});
-
-// async function fetchProtectedData() {
-//     let accessToken = localStorage.getItem('accessToken'); //
-//
-//     if (!accessToken || isTokenExpired(accessToken)) {
-//         accessToken = await refreshToken();
-//         if (!accessToken) {
-//             alert('Session expired. Please log in again.');
-//             return;
-//         }
-//     }
-//
-//     const response = await fetch('/api/protected/', {
-//         method: 'GET',
-//         headers: {
-//             'Authorization': `Bearer ${accessToken}`,
-//         },
-//     });
-//
-//     if (response.ok) {
-//         const data = await response.json();
-//         console.log(data);
-//     } else if (response.status === 401) {
-//         // If the token is still expired even after refresh, force the user to log in again
-//         alert('Session expired. Please log in again.');
-//     } else {
-//         console.log('Failed to fetch protected data');
-//     }
-// }
 
 export { handleLogin };

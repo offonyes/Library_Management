@@ -25,9 +25,7 @@
             <div class="field-wrapper">
               <input type="password" name="password" placeholder="password" id="password" autocomplete="new-password">
               <label>Password</label>
-              {% for error in login_form.password.errors %}
-                  <span class="error">{{ error }}</span>
-              {% endfor %}
+            <div id="login-error" class="error"></div>
             </div>
             {% if is_active is False %}
               <div class="field-wrapper">

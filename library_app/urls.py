@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from rest_framework.views import APIView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -11,7 +12,7 @@ from library_app.views import (BookViewSet, GenreViewSet, AuthorViewSet,
                                TopBooksView, TopBooksLateReturnsView,
                                TopUsersLateReturnsView, BorrowCountLastYearView, BookReservationView,
                                BooksBorrowHistoryListView, ActiveBooksBorrowListView,
-                               index)
+                               index, reservation, reservation_history, borrow, borrow_history)
 
 router = DefaultRouter()
 router.register(r'books', BookViewSet)
@@ -21,7 +22,11 @@ router.register(r'reservations', BookReservationView)
 
 urlpatterns = [
     # Page urls
-    path("index/", index, name='index'),
+    path('index/', index, name='index'),
+    path('reservations/', reservation, name='reservation'),
+    path('reservation/history/', reservation_history, name='reservation_history'),
+    path('borrow/', borrow, name='borrow'),
+    path('borrow/history/', borrow_history, name='borrow_history'),
 
     # Package urls
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
@@ -37,7 +42,7 @@ urlpatterns = [
     path('api/top/books/', TopBooksView.as_view(), name='topbooks'),
     path('api/top/late/books/', TopBooksLateReturnsView.as_view(), name='toplatebooks'),
     path('api/top/late/users/', TopUsersLateReturnsView.as_view(), name='toplateusers'),
-    path('api/last_year_count', BorrowCountLastYearView.as_view(), name='lastyearcount'),
-    path('api/borrows/active', ActiveBooksBorrowListView.as_view(), name='activebooksborrows'),
-    path('api/borrows/history', BooksBorrowHistoryListView.as_view(), name='booksborrowhistory'),
+    path('api/last_year_count/', BorrowCountLastYearView.as_view(), name='lastyearcount'),
+    path('api/borrows/', ActiveBooksBorrowListView.as_view(), name='activebooksborrows'),
+    path('api/borrows/history/', BooksBorrowHistoryListView.as_view(), name='booksborrowhistory'),
 ]

@@ -17,6 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from Library_Management.settings import DEBUG
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("__debug__/", include("debug_toolbar.urls")),
@@ -27,3 +29,7 @@ urlpatterns = [
 
 admin.site.index_title = "Bookstore"
 admin.site.site_header = "Bookstore Administration"
+
+if DEBUG:
+    from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+    urlpatterns += staticfiles_urlpatterns()

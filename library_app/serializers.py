@@ -22,6 +22,15 @@ class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
         fields = ['id', 'title', 'authors', 'genres', 'stock', 'published_date', 'borrow_count', 'image_link']
+        depth = 1
+
+
+class CreateBookSerializer(serializers.ModelSerializer):
+    borrow_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Book
+        fields = ['id', 'title', 'authors', 'genres', 'stock', 'published_date', 'borrow_count', 'image_link']
 
 
 class TopBooksSerializer(serializers.ModelSerializer):
@@ -59,11 +68,20 @@ class BorrowCountLastYearSerializer(serializers.ModelSerializer):
 class BookReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = BookReservation
-        fields = '__all__'
-        read_only_fields = ['expiration_date', 'borrower', 'reservation_status']
+        read_only_fields = ['expiration_date', 'reservation_status']
+        exclude = ['borrower']
+        depth = 1
+
+
+class CreateBookReservationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BookReservation
+        read_only_fields = ['expiration_date', 'reservation_status']
+        exclude = ['borrower']
 
 
 class BooksBorrowSerializer(serializers.ModelSerializer):
     class Meta:
         model = BooksBorrow
-        fields = '__all__'
+        depth = 1
+        exclude = ['borrower']

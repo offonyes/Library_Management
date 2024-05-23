@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Book Library{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles1.css' %}?v=1.0">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{% url 'index' %}">Books</a></li>
+                <li><a href="{% url 'reservation' %}">Reservations</a></li>
+                <li><a href="{% url 'borrow' %}">Borrows</a></li>
+            </ul>
+
+            <div class="user-info">
+                {% block search %}
+                    <input type="text" id="search-input" placeholder="Search(genre, author, title)">
+                    <input type="submit" id="search-button" class="logout-button" value="Search">
+                {% endblock %}
+                <form action="/">
+                    <input type="submit" class="logout-button" value="Logout" onclick=delToken() />
+                </form>
+            </div>
+        </nav>
+        {% block header %}{% endblock %}
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    <div class="button-container"></div>
+    <script type="module">
+        import { fetchBooks } from "/static/js/bookScript.js";
+
+        const searchButton = document.getElementById('search-button');
+        const searchInput = document.getElementById('search-input');
+
+        searchButton.addEventListener('click', () => {
+            const query = searchInput.value;
+            if (query) {
+                fetchBooks(`/api/books/?page_size=20&search=${encodeURIComponent(query)}`);
+        }});
+    </script>
+    <script>
+        function delToken(){
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken')
+        }
+    </script>
+    <script type="module">
+    import { checkTokens} from '/static/js/check_token.js';
+    document.addEventListener('DOMContentLoaded', () => {
+        checkTokens();
+    });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

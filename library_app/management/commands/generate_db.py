@@ -44,18 +44,12 @@ class Command(BaseCommand):
                 for genre in genres:
                     if genre == 'none':
                         continue
-                    try:
-                        genre_obj = Genre.objects.create(name=genre)
-                    except IntegrityError:
-                        genre_obj = Genre.objects.get(name=genre)
+                    genre_obj = Genre.objects.get_or_create(name=genre)
                     book.genres.add(genre_obj)
                 for autho in author:
                     if autho == 'none':
                         continue
-                    try:
-                        autho_obj = Author.objects.create(name=autho)
-                    except IntegrityError:
-                        autho_obj = Author.objects.get(name=autho)
+                    autho_obj = Author.objects.get_or_create(name=autho)
                     book.authors.add(autho_obj)
 
         self.stdout.write("Done")

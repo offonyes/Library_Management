@@ -4,8 +4,8 @@ from django.db.models import Count, Q
 from django.shortcuts import render
 from django.utils import timezone
 from rest_framework import viewsets, permissions, filters, generics, status, serializers
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -15,11 +15,27 @@ from accounts_app.models import CustomUser
 from library_app.models import Book, Author, Genre, BookReservation, BooksBorrow
 from library_app.serializers import BookSerializer, AuthorSerializer, GenreSerializer, TopBooksSerializer, \
     TopBooksLateReturnsSerializer, TopUsersLateReturnsSerializer, BorrowCountLastYearSerializer, \
-    BookReservationSerializer, BooksBorrowSerializer
+    BookReservationSerializer, BooksBorrowSerializer, CreateBookSerializer, CreateBookReservationSerializer
 
 
 def index(request):
     return render(request, template_name='index.html')
+
+
+def reservation(request):
+    return render(request, template_name='library_app/reservation.html')
+
+
+def reservation_history(request):
+    return render(request, template_name='library_app/reservation_history.html')
+
+
+def borrow(request):
+    return render(request, template_name='library_app/borrow.html')
+
+
+def borrow_history(request):
+    return render(request, template_name='library_app/borrow_history.html')
 
 
 class BookPagination(PageNumberPagination):
@@ -46,7 +62,6 @@ class MyViewSet(viewsets.ModelViewSet):
                                            ' genre, author, published year.')
 class BookViewSet(MyViewSet):
     queryset = Book.objects.all()
-    serializer_class = BookSerializer
     search_fields = ['id', 'title', 'authors__name', 'genres__name']
 
     def get_queryset(self):
@@ -54,6 +69,11 @@ class BookViewSet(MyViewSet):
             borrow_count=Count('borrows',
                                filter=Q(borrows__borrowed_status='returned') | Q(borrows__borrowed_status='borrowed')))
         return qs
+
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return BookSerializer
+        return CreateBookSerializer
 
 
 @extend_schema(tags=['Genres'], description='Retrieve a list of genres. You can search for genres by title.')
@@ -118,7 +138,6 @@ class BorrowCountLastYearView(generics.ListAPIView):
 @extend_schema(tags=['User Management'])
 class BookReservationView(viewsets.ModelViewSet):
     queryset = BookReservation.objects.all()
-    serializer_class = BookReservationSerializer
     pagination_class = BookPagination
     http_method_names = ['get', 'post']
     permission_classes = [permissions.IsAuthenticated]
@@ -127,6 +146,11 @@ class BookReservationView(viewsets.ModelViewSet):
     def get_queryset(self):
         return BookReservation.objects.filter(borrower=self.request.user,
                                               reservation_status__in=['reserved', 'wishlist'])
+
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return BookReservationSerializer
+        return CreateBookReservationSerializer
 
     def perform_create(self, serializer):
         book = serializer.validated_data['book']
@@ -204,6 +228,7 @@ class ActiveBooksBorrowListView(generics.ListAPIView):
     serializer_class = BooksBorrowSerializer
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
+    pagination_class = BookPagination
 
     def get_queryset(self):
         user = self.request.user
@@ -211,15 +236,16 @@ class ActiveBooksBorrowListView(generics.ListAPIView):
             borrower=user,
             borrowed_status__in=['borrowed', 'overdue'],
             return_date__isnull=True
-        )
+        ).prefetch_related('book__authors', 'book__genres')
 
 
 @extend_schema(tags=['User Management'])
 class BooksBorrowHistoryListView(generics.ListAPIView):
+    pagination_class = BookPagination
     serializer_class = BooksBorrowSerializer
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
     def get_queryset(self):
         user = self.request.user
-        return BooksBorrow.objects.filter(borrower=user)
+        return BooksBorrow.objects.filter(borrower=user).prefetch_related('book__authors', 'book__genres')

@@ -1,6 +1,14 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %} Book Library {% endblock %}
+{% block header %}
+<div class="center-header">
+    <ul>
+        <li><a href="{% url 'borrow' %}">Active</a></li>
+        <li><a href="{% url 'borrow_history' %}">History</a></li>
+    </ul>
+</div>
+{% endblock %}
 {% block content %}
     <div id="books-container">
     </div>
@@ -9,9 +17,9 @@
 {% block scripts %}
     <script src="{% static 'js/script1.js' %}?v=2.0" type="module"></script>
     <script type="module">
-        import { fetchBooks } from '/static/js/bookScript.js'
+        import { fetchBooks } from '/static/js/reservation.js'
         document.addEventListener('DOMContentLoaded', () => {
-            fetchBooks('/api/books/?page_size=20');
+            fetchBooks('/api/borrows/history/?page_size=20');
         });
     </script>
 
