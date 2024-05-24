@@ -12,10 +12,9 @@ class Command(BaseCommand):
             reservation_status='reserved',
             expiration_date__lt=now
         )
-
-        for reservation in expired_reservations:
-            reservation.reservation_status = 'reservation_expired'
-            reservation.save()
-
         if not expired_reservations.exists():
             self.stdout.write(self.style.SUCCESS('No expired reservations found.'))
+        else:
+            updated_count = expired_reservations.update(reservation_status='reservation_expired')
+            if updated_count > 0:
+                self.stdout.write(self.style.SUCCESS(f'Done. {updated_count} reservations expired.'))

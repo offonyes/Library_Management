@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     # App
     "accounts_app",
     "library_app",
-    "api_app"
+    "front_app"
 ]
 
 MIDDLEWARE = [
@@ -148,9 +148,8 @@ CSRF_COOKIE_SECURE = True
 # Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_FROM = "abcd"
-EMAIL_HOST_USER = "abcd"
-EMAIL_HOST_PASSWORD = "abcd"
+EMAIL_HOST_USER = "example.testing.py@gmail.com"
+EMAIL_HOST_PASSWORD = "mnpv rgrb avux ybnn"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 

@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 
-from .models import BookReservation, BooksBorrow
+from library_app.models import BookReservation, BooksBorrow
 
 
 class BookReservationForm(forms.ModelForm):

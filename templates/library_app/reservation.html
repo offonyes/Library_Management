@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %} Book Library {% endblock %}
+{% block title %} Active Reservation {% endblock %}
 {% block header %}
 <div class="center-header">
     <ul>
-        <li><a href="#add">Add</a></li>
+        <li><a href="{% url 'add_reservation' %}">Add</a></li>
         <li><a href="{% url 'reservation' %}">Active</a></li>
         <li><a href="{% url 'reservation_history' %}">History</a></li>
     </ul>
@@ -16,7 +16,6 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="{% static 'js/script1.js' %}?v=2.0" type="module"></script>
     <script type="module">
         import { fetchBooks } from '/static/js/reservation.js'
         document.addEventListener('DOMContentLoaded', () => {

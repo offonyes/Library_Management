@@ -5,14 +5,27 @@
     <div id="books-container">
     </div>
 {% endblock %}
-
+{% block search %}
+    <input type="text" id="search-input" placeholder="Search(genre, author, title)">
+    <input type="submit" id="search-button" class="logout-button" value="Search">
+{%  endblock %}
 {% block scripts %}
-    <script src="{% static 'js/script1.js' %}?v=2.0" type="module"></script>
     <script type="module">
         import { fetchBooks } from '/static/js/bookScript.js'
         document.addEventListener('DOMContentLoaded', () => {
             fetchBooks('/api/books/?page_size=20');
         });
     </script>
+        <script type="module">
+        import { fetchBooks } from "/static/js/bookScript.js";
 
+        const searchButton = document.getElementById('search-button');
+        const searchInput = document.getElementById('search-input');
+
+        searchButton.addEventListener('click', () => {
+            const query = searchInput.value;
+            if (query) {
+                fetchBooks(`/api/books/?page_size=20&search=${encodeURIComponent(query)}`);
+        }});
+    </script>
 {% endblock %}

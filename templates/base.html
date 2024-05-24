@@ -18,8 +18,7 @@
 
             <div class="user-info">
                 {% block search %}
-                    <input type="text" id="search-input" placeholder="Search(genre, author, title)">
-                    <input type="submit" id="search-button" class="logout-button" value="Search">
+
                 {% endblock %}
                 <form action="/">
                     <input type="submit" class="logout-button" value="Logout" onclick=delToken() />
@@ -32,18 +31,6 @@
         {% block content %}{% endblock %}
     </main>
     <div class="button-container"></div>
-    <script type="module">
-        import { fetchBooks } from "/static/js/bookScript.js";
-
-        const searchButton = document.getElementById('search-button');
-        const searchInput = document.getElementById('search-input');
-
-        searchButton.addEventListener('click', () => {
-            const query = searchInput.value;
-            if (query) {
-                fetchBooks(`/api/books/?page_size=20&search=${encodeURIComponent(query)}`);
-        }});
-    </script>
     <script>
         function delToken(){
             localStorage.removeItem('accessToken');

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from accounts_app.models import CustomUser
-from .models import Book, Genre, Author, BookReservation, BooksBorrow
+from library_app.models import Book, Genre, Author, BookReservation, BooksBorrow
 
 
 class AuthorSerializer(serializers.ModelSerializer):

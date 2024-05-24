@@ -1,10 +1,8 @@
 from datetime import timedelta
 
 from django.db.models import Count, Q
-from django.shortcuts import render
 from django.utils import timezone
 from rest_framework import viewsets, permissions, filters, generics, status, serializers
-from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -16,26 +14,6 @@ from library_app.models import Book, Author, Genre, BookReservation, BooksBorrow
 from library_app.serializers import BookSerializer, AuthorSerializer, GenreSerializer, TopBooksSerializer, \
     TopBooksLateReturnsSerializer, TopUsersLateReturnsSerializer, BorrowCountLastYearSerializer, \
     BookReservationSerializer, BooksBorrowSerializer, CreateBookSerializer, CreateBookReservationSerializer
-
-
-def index(request):
-    return render(request, template_name='index.html')
-
-
-def reservation(request):
-    return render(request, template_name='library_app/reservation.html')
-
-
-def reservation_history(request):
-    return render(request, template_name='library_app/reservation_history.html')
-
-
-def borrow(request):
-    return render(request, template_name='library_app/borrow.html')
-
-
-def borrow_history(request):
-    return render(request, template_name='library_app/borrow_history.html')
 
 
 class BookPagination(PageNumberPagination):
@@ -148,9 +126,9 @@ class BookReservationView(viewsets.ModelViewSet):
                                               reservation_status__in=['reserved', 'wishlist'])
 
     def get_serializer_class(self):
-        if self.action in ['list', 'retrieve']:
-            return BookReservationSerializer
-        return CreateBookReservationSerializer
+        if self.action == 'create':
+            return CreateBookReservationSerializer
+        return BookReservationSerializer
 
     def perform_create(self, serializer):
         book = serializer.validated_data['book']

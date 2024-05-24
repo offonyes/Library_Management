@@ -1,7 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
-from rest_framework.views import APIView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -11,8 +10,7 @@ from rest_framework_simplejwt.views import (
 from library_app.views import (BookViewSet, GenreViewSet, AuthorViewSet,
                                TopBooksView, TopBooksLateReturnsView,
                                TopUsersLateReturnsView, BorrowCountLastYearView, BookReservationView,
-                               BooksBorrowHistoryListView, ActiveBooksBorrowListView,
-                               index, reservation, reservation_history, borrow, borrow_history)
+                               BooksBorrowHistoryListView, ActiveBooksBorrowListView)
 
 router = DefaultRouter()
 router.register(r'books', BookViewSet)
@@ -21,15 +19,7 @@ router.register(r'authors', AuthorViewSet)
 router.register(r'reservations', BookReservationView)
 
 urlpatterns = [
-    # Page urls
-    path('index/', index, name='index'),
-    path('reservations/', reservation, name='reservation'),
-    path('reservation/history/', reservation_history, name='reservation_history'),
-    path('borrow/', borrow, name='borrow'),
-    path('borrow/history/', borrow_history, name='borrow_history'),
-
     # Package urls
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),

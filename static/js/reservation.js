@@ -8,6 +8,7 @@ function fetchBooks(url) {
 
     fetch(url, {
         headers: {
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${accessToken}`
         }
     }).then(response => response.json())
@@ -43,9 +44,7 @@ function fetchBooks(url) {
                   bookInfo.appendChild(reservationStatus);
                   bookInfo.appendChild(reservedDate);
                   bookInfo.appendChild(expirationDate);
-
-              }
-              if (url.includes('cancel')){
+                  if (!url.includes('history')){
                   const cancelButton = document.createElement('button');
                   cancelButton.textContent = 'Cancel Reservation';
                   cancelButton.addEventListener('click', () => {
@@ -53,6 +52,8 @@ function fetchBooks(url) {
                   });
                   bookInfo.appendChild(cancelButton);
               }
+              }
+
               if (url.includes('borrow')) {
                   const borrowedDate = document.createElement('p');
                   borrowedDate.textContent = `Borrowed Date: ${data.borrowed_date}`;
@@ -74,8 +75,8 @@ function fetchBooks(url) {
               booksContainer.appendChild(bookCard);
           });
 
-          buttonContainer.innerHTML = ''; // Clear previous button
-
+          buttonContainer.innerHTML = ``; // Clear previous button
+          console.log(data.next)
           if (data.next) {
               const loadNextButton = document.createElement('button');
               loadNextButton.textContent = 'Load Next';

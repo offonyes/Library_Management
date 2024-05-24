@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Add Reservation{% endblock %}
+{% block header %}
+<div class="center-header">
+    <ul>
+        <li><a href="{% url 'add_reservation' %}">Add</a></li>
+        <li><a href="{% url 'reservation' %}">Active</a></li>
+        <li><a href="{% url 'reservation_history' %}">History</a></li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Add Reservation</h2>
+    <form id="form">
+        {{ form.as_p }}
+        <input type="button" id="search-button" class="logout-button" value="Submit">
+    </form>
+</div>
+{% endblock %}
+{% block scripts %}
+    <script type="module">
+        async function formFunc() {
+            let url = '/api/reservations/';
+            const accessToken = localStorage.getItem('accessToken');
+
+            const form = document.getElementById('form');
+            const formData = new FormData(form);
+            const bookId = formData.get('book');
+            const reservationStatus = formData.get('reservation_status');
+
+            if (!bookId || !reservationStatus){
+                alert('Choose book or reservation');
+            }
+
+            if (reservationStatus === 'wishlist'){
+                url = '/api/reservations/add_wishlist/';
+            }
+            const requestBody = {
+                book: bookId
+            };
+
+            console.log(requestBody)
+            await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody)
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Reservation successful'); // Alert or handle success
+                    console.log('Reservation successful');
+                }
+                console.log(response.text())
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const button = document.getElementById('search-button')
+    button.addEventListener('click', formFunc);
+});
+    </script>
+{% endblock %}

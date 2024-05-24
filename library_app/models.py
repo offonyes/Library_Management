@@ -5,8 +5,6 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 
 from library_app.choice import BORROWS_STATUS_TYPE, RESERVATION_STATUS_TYPE
 
-# Create your models here.
-
 
 class Genre(models.Model):
     name = models.CharField(verbose_name=_('Genre Name'), max_length=100, null=False, blank=False,

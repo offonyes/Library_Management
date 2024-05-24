@@ -13,22 +13,23 @@ from library_app.filters import AuthorsFilter, GenresFilter, BooksFilter, Borrow
 
 @admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'description']
+    list_display = ['name', 'description']
     search_fields = ['name']
     list_per_page = 10
 
 
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'description']
+    list_display = ['name', 'description']
     search_fields = ['name']
     list_per_page = 10
 
 
 class BooksInline(TabularInlinePaginated):
     model = BooksBorrow
-    verbose_name = _('Book History')
-    verbose_name_plural = _('Book Histories')
+    verbose_name = _('Book Borrowing History')
+    verbose_name_plural = _('Book Borrowing Histories')
+    can_delete = False
     per_page = 10
     max_num = 0
     readonly_fields = ['book', 'borrower', 'borrowed_status', 'return_date']
@@ -41,7 +42,7 @@ class BooksInline(TabularInlinePaginated):
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
     inlines = [BooksInline]
-    list_display = ['id', 'title', 'published_date', 'stock', 'borrowed_books', 'reservation_books', 'borrowed_count']
+    list_display = ['title', 'published_date', 'stock', 'borrowed_books', 'reservation_books', 'borrowed_count']
     readonly_fields = ['borrowed_books', 'reservation_books', 'borrowed_count']
     autocomplete_fields = ['authors', 'genres']
     list_filter = [AuthorsFilter, GenresFilter]

@@ -1,8 +1,3 @@
-// auth.js
-
-// import { refreshToken } from './token_handler.js';
-
-// Отправка формы логина
 document.getElementById('login-form').addEventListener('submit', handleLogin);
 
 async function handleLogin(event) {
@@ -35,6 +30,5 @@ async function handleLogin(event) {
         errorElement.style.display = 'block';
     }
 }
-
 
 export { handleLogin };

@@ -1,7 +1,5 @@
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
-from django.contrib.auth import logout
-from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
 
 from accounts_app.forms import LoginForm, RegisterForm
 
@@ -25,13 +23,3 @@ def login_register(request):
         "accounts_app/log_reg.html",
         {"login_form": login_form, "register_form": register_form, "is_active": True},
     )
-
-
-@login_required(login_url="/")
-def redirecting_view(request):
-    return render(request, "index.html")
-
-
-def log_out(request):
-    logout(request)
-    return redirect("logout")
