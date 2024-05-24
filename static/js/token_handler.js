@@ -1,11 +1,3 @@
-// Check token Status
-// function isTokenExpired(token) {
-//     const decodedToken = jwt_decode(token);
-//     const currentTime = Date.now() / 1000;
-//     return decodedToken.exp < currentTime;
-// }
-
-// Refresh Token
 async function refreshToken() {
     const refreshToken = localStorage.getItem('refreshToken');
 

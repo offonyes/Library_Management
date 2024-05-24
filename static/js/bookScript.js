@@ -1,8 +1,10 @@
+const booksContainer = document.getElementById('books-container');
+const buttonContainer = document.createElement('div');
+buttonContainer.classList.add('button-container');
+document.body.appendChild(buttonContainer);
+
+
 function fetchBooks(url) {
-    const booksContainer = document.getElementById('books-container');
-    const buttonContainer = document.createElement('div');
-    buttonContainer.classList.add('button-container');
-    document.body.appendChild(buttonContainer);
 
     const accessToken = localStorage.getItem('accessToken');
 

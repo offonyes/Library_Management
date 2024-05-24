@@ -16,7 +16,10 @@
     <h2>Add Reservation</h2>
     <form id="form">
         {{ form.as_p }}
+        <a id="error"></a>
+        <br>
         <input type="button" id="search-button" class="logout-button" value="Submit">
+
     </form>
 </div>
 {% endblock %}
@@ -25,6 +28,7 @@
         async function formFunc() {
             let url = '/api/reservations/';
             const accessToken = localStorage.getItem('accessToken');
+            let errorText = document.getElementById('error');
 
             const form = document.getElementById('form');
             const formData = new FormData(form);
@@ -53,10 +57,15 @@
             })
             .then(response => {
                 if (response.ok) {
-                    alert('Reservation successful'); // Alert or handle success
+                    alert('Reservation successful');
                     console.log('Reservation successful');
                 }
-                console.log(response.text())
+
+                response.text().then(text => {
+                    const jsonResponse = JSON.parse(text);
+                    const detail = jsonResponse.detail;
+                    errorText.textContent = detail;
+                });
             })
             .catch(error => {
                 console.error('Error:', error);

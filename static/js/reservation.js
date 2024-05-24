@@ -1,9 +1,9 @@
-function fetchBooks(url) {
-    const booksContainer = document.getElementById('books-container');
-    const buttonContainer = document.createElement('div');
-    buttonContainer.classList.add('button-container');
-    document.body.appendChild(buttonContainer);
+const booksContainer = document.getElementById('books-container');
+const buttonContainer = document.createElement('div');
+buttonContainer.classList.add('button-container');
+document.body.appendChild(buttonContainer);
 
+function fetchBooks(url) {
     const accessToken = localStorage.getItem('accessToken');
 
     fetch(url, {
@@ -13,10 +13,6 @@ function fetchBooks(url) {
         }
     }).then(response => response.json())
       .then(data => {
-          if (!url.includes('page=')) {
-              booksContainer.innerHTML = '';
-          }
-
           data.results.forEach(data => {
               const bookCard = document.createElement('div');
               bookCard.classList.add('book-card');
@@ -76,7 +72,6 @@ function fetchBooks(url) {
           });
 
           buttonContainer.innerHTML = ``; // Clear previous button
-          console.log(data.next)
           if (data.next) {
               const loadNextButton = document.createElement('button');
               loadNextButton.textContent = 'Load Next';
