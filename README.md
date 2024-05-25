@@ -21,11 +21,11 @@ Project has 2 main apps: accounts_app and library_app. There's also third app ca
 - **See history**: Can browse history of borrowing user or books.
 
 ## Rules
-- User cannot reserve a book if he has more than 5 borrowed or reserved books(2 same books).
-- User can reserve a book and has 24 hours to pick it up. By using the "check_reservation" command, if a person's reservation time has passed, then the reservation status will change to expired.
-- User cann't borrow books more than 2 weeks. By using the "check_borrow" command, a person will receive an email message that he is overdue for the return of the book.
-- User can add to wishlist. By using the "check_wishlist" command, a person will receive a message by email (if he has books in his wishlist) that he can reserve this book.
-- The admin using the admin panel can issue as many books as he wants.
+- User cannot reserve a book if he has more than `5` borrowed or reserved books(`2` same books).
+- User can reserve a book and has 24 hours to pick it up. By using the `check_reservation` command, if a person's reservation time has passed, then the reservation status will change to expired.
+- User cann't borrow books more than `2 weeks`. By using the `check_borrow` command, a person will receive an email message that he is overdue for the return of the book.
+- User can add to wishlist. By using the `check_wishlist` command, a person will receive a message by email (if he has books in his wishlist) that he can reserve this book.
+- The admin using the admin panel can `issue as many books as he wants`.
 
 ## API Endpoints
 The core functionality is accessible via REST API endpoints. To view the detailed API documentation, see the swagger documentation at
