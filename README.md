@@ -33,7 +33,7 @@ The core functionality is accessible via REST API endpoints. To view the detaile
 http://127.0.0.1:8000/api/schema/swagger-ui/
 ```
 ## Installation
-
+- Python 3.12
 1. Clone the repository:
 ```shell
 git clone https://github.com/offonyes/Library_Management
