@@ -104,6 +104,9 @@ class BookReservationAdmin(admin.ModelAdmin):
     autocomplete_fields = ['book', 'borrower']
     actions = ['mark_as_picked_up']
 
+    def get_queryset(self, request):
+        return super(BookReservationAdmin, self).get_queryset(request).select_related('book', 'borrower')
+
     def mark_as_picked_up(self, request, queryset):
         for reservation in queryset:
             if reservation.reservation_status == 'reserved':

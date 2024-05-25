@@ -3,6 +3,7 @@ from datetime import timedelta
 from django.db.models import Count, Q
 from django.utils import timezone
 from rest_framework import viewsets, permissions, filters, generics, status, serializers
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -43,9 +44,11 @@ class BookViewSet(MyViewSet):
     search_fields = ['id', 'title', 'authors__name', 'genres__name']
 
     def get_queryset(self):
-        qs = Book.objects.annotate(
-            borrow_count=Count('borrows',
-                               filter=Q(borrows__borrowed_status='returned') | Q(borrows__borrowed_status='borrowed')))
+        qs = (Book.objects.annotate(
+            borrow_count=Count(
+                'borrows',
+                filter=Q(borrows__borrowed_status__in=['borrowed', 'returned', 'overdue', 'overdue_returned'])))
+              .prefetch_related('authors', 'genres'))
         return qs
 
     def get_serializer_class(self):
@@ -122,8 +125,9 @@ class BookReservationView(viewsets.ModelViewSet):
     authentication_classes = [JWTAuthentication]
 
     def get_queryset(self):
-        return BookReservation.objects.filter(borrower=self.request.user,
-                                              reservation_status__in=['reserved', 'wishlist'])
+        return BookReservation.objects.filter(
+            borrower=self.request.user, reservation_status__in=['reserved', 'wishlist']
+        ).prefetch_related('book__authors', 'book__genres')
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -136,7 +140,10 @@ class BookReservationView(viewsets.ModelViewSet):
         if book is None:
             raise serializers.ValidationError({'error': 'This book does not exist'})
 
-        if user.borrows.filter(borrowed_status='borrowed').count() >= 5:
+        if BookReservation.objects.filter(borrower=user, book=book, reservation_status='reserved').exists():
+            raise serializers.ValidationError({'detail': 'You have already reserved this book.'}, code='invalid')
+
+        if user.borrows.filter(borrowed_status__in=['borrowed', 'overdue']).count() >= 5:
             raise serializers.ValidationError({'detail': 'You already have an active 5 borrowings. '
                                                          'Please return it before making'
                                                          ' a new reservation.'}, code='invalid')
@@ -145,12 +152,12 @@ class BookReservationView(viewsets.ModelViewSet):
                                                          'Please complete or cancel it before making'
                                                          ' a new reservation.'}, code='invalid')
 
-        borrowed_count = book.borrows.filter(borrowed_status='borrowed').count()
+        borrowed_count = book.borrows.filter(borrowed_status__in=['borrowed', 'overdue']).count()
         reserved_count = book.reservations.filter(reservation_status='reserved').count()
+
         if (borrowed_count + reserved_count) >= book.stock:
             raise serializers.ValidationError({'detail': 'Not enough books available. You can add to wishlist.'})
-        if BookReservation.objects.filter(borrower=user, book=book, reservation_status='reserved').exists():
-            raise serializers.ValidationError({'detail': 'You have already reserved this book.'}, code='invalid')
+
         wishlist_reservation = BookReservation.objects.filter(borrower=user, book=book,
                                                               reservation_status='wishlist').first()
         if wishlist_reservation:
@@ -174,7 +181,8 @@ class BookReservationView(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='history')
     def history_reservations(self, request):
-        history_reservations = BookReservation.objects.filter(borrower=request.user)
+        history_reservations = BookReservation.objects.filter(borrower=request.user
+                                                              ).prefetch_related('book__authors', 'book__genres')
         page = self.paginate_queryset(history_reservations)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -209,9 +217,8 @@ class ActiveBooksBorrowListView(generics.ListAPIView):
     pagination_class = BookPagination
 
     def get_queryset(self):
-        user = self.request.user
         return BooksBorrow.objects.filter(
-            borrower=user,
+            borrower=self.request.user,
             borrowed_status__in=['borrowed', 'overdue'],
             return_date__isnull=True
         ).prefetch_related('book__authors', 'book__genres')
@@ -225,5 +232,5 @@ class BooksBorrowHistoryListView(generics.ListAPIView):
     authentication_classes = [JWTAuthentication]
 
     def get_queryset(self):
-        user = self.request.user
-        return BooksBorrow.objects.filter(borrower=user).prefetch_related('book__authors', 'book__genres')
+        return BooksBorrow.objects.filter(
+            borrower=self.request.user).prefetch_related('book__authors', 'book__genres')
