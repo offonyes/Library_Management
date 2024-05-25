@@ -17,7 +17,7 @@ class BookReservationForm(forms.ModelForm):
         if book:
             if status == 'reserved':
                 borrowed_count = book.borrows.filter(
-                    Q(borrowed_status='borrowed') | Q(borrowed_status='overdue')).count()
+                    Q(borrowed_status__in=['borrowed', 'overdue'])).count()
                 reserved_count = book.reservations.filter(reservation_status='reserved').count()
                 total_unavailable = borrowed_count + reserved_count
                 if total_unavailable >= book.stock:
@@ -38,7 +38,7 @@ class BooksBorrowForm(forms.ModelForm):
         if book:
             if status in ['borrowed', 'overdue']:
                 borrowed_count = book.borrows.filter(
-                    Q(borrowed_status='borrowed') | Q(borrowed_status='overdue')).count()
+                    Q(borrowed_status__in=['borrowed', 'overdue'])).count()
                 reserved_count = book.reservations.filter(reservation_status='reserved').count()
                 total_unavailable = borrowed_count + reserved_count
                 if total_unavailable >= book.stock:

@@ -15,7 +15,7 @@ class Command(BaseCommand):
 
         for wishlist in wishlists:
             book = wishlist.book
-            borrowed_count = book.borrows.filter(borrowed_status='borrowed').count()
+            borrowed_count = book.borrows.filter(borrowed_status__in=['borrowed', 'overdue']).count()
             reserved_count = book.reservations.filter(reservation_status='reserved').count()
             if (borrowed_count + reserved_count) < book.stock:
                 subject = 'Your wishlist book is ready for reservation.'
