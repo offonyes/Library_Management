@@ -1,4 +1,3 @@
-from django.db.utils import IntegrityError
 from django.core.management.base import BaseCommand
 from library_app.models import Book, Author, Genre
 import csv
