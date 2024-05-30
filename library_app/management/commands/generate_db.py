@@ -36,19 +36,19 @@ class Command(BaseCommand):
                 author.extend([author.strip() for author in re.split('&|amp|;', authors) if author.strip()])
                 book = Book.objects.create(
                     title=title,
-                    published_date=published_date,
+                    published_year=published_date,
                     stock=random.randint(1, 15),
                     image_link=image
                 )
                 for genre in genres:
                     if genre == 'none':
                         continue
-                    genre_obj = Genre.objects.get_or_create(name=genre)
+                    genre_obj, created = Genre.objects.get_or_create(name=genre)
                     book.genres.add(genre_obj)
                 for autho in author:
                     if autho == 'none':
                         continue
-                    autho_obj = Author.objects.get_or_create(name=autho)
+                    autho_obj, created = Author.objects.get_or_create(name=autho)
                     book.authors.add(autho_obj)
 
         self.stdout.write("Done")

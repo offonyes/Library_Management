@@ -42,14 +42,14 @@ class BooksInline(TabularInlinePaginated):
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
     inlines = [BooksInline]
-    list_display = ['title', 'published_date', 'stock', 'borrowed_books', 'reservation_books', 'borrowed_count']
+    list_display = ['title', 'published_year', 'stock', 'borrowed_books', 'reservation_books', 'borrowed_count']
     readonly_fields = ['borrowed_books', 'reservation_books', 'borrowed_count']
     autocomplete_fields = ['authors', 'genres']
     list_filter = [AuthorsFilter, GenresFilter]
     list_per_page = 25
     search_fields = ['title']
     fieldsets = (
-        ("Book Information", {'fields': (('title', 'published_date'), ('authors', 'genres'), 'image_link', 'stock'),
+        ("Book Information", {'fields': (('title', 'published_year'), ('authors', 'genres'), 'image_link', 'stock'),
                               'classes': ('extra',)}),
         ("Book Stats", {'fields': (('reservation_books', 'borrowed_books'), 'borrowed_count'),
                         "classes": ("wide",)})

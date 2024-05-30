@@ -38,7 +38,7 @@ function fetchBooks(url) {
                 genres.textContent = `Genres: ${book.genres.map(genre => genre.name).join(', ')}`;
 
                 const publishedDate = document.createElement('p');
-                publishedDate.textContent = `Published Date: ${book.published_date}`;
+                publishedDate.textContent = `Published Year: ${book.published_year}`;
 
                 bookInfo.appendChild(title);
                 bookInfo.appendChild(authors);

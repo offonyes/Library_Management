@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
+from django.core.validators import MinLengthValidator
 
 from accounts_app.managers import CustomUserManager
 
@@ -15,7 +16,7 @@ class CustomUser(AbstractUser):
         max_length=100, null=False, blank=False, verbose_name=_("Last Name")
     )
     personal_number = models.CharField(
-        max_length=11, null=False, blank=False, verbose_name=_("Personal Number")
+        max_length=11, null=False, blank=False, verbose_name=_("Personal Number"), validators=[MinLengthValidator(11)]
     )
     birth_date = models.DateField(
         null=False, blank=False, verbose_name=_("Date of Birth")
