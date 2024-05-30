@@ -21,7 +21,7 @@ class BookSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Book
-        fields = ['id', 'title', 'authors', 'genres', 'stock', 'published_date', 'borrow_count', 'image_link']
+        fields = ['id', 'title', 'authors', 'genres', 'stock', 'published_year', 'borrow_count', 'image_link']
         depth = 1
 
 
@@ -30,7 +30,7 @@ class CreateBookSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Book
-        fields = ['id', 'title', 'authors', 'genres', 'stock', 'published_date', 'borrow_count', 'image_link']
+        fields = ['id', 'title', 'authors', 'genres', 'stock', 'published_year', 'borrow_count', 'image_link']
 
 
 class TopBooksSerializer(serializers.ModelSerializer):

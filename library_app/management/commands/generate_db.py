@@ -36,7 +36,7 @@ class Command(BaseCommand):
                 author.extend([author.strip() for author in re.split('&|amp|;', authors) if author.strip()])
                 book = Book.objects.create(
                     title=title,
-                    published_date=published_date,
+                    published_year=published_date,
                     stock=random.randint(1, 15),
                     image_link=image
                 )

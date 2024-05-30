@@ -51,10 +51,10 @@ class Book(models.Model):
     genres = models.ManyToManyField(Genre, related_name="books", verbose_name=_('Genres'),
                                     blank=True)
     title = models.CharField(max_length=100, null=False, blank=False, verbose_name=_('Book Title'))
-    published_date = models.IntegerField(validators=[MinValueValidator(1800), max_value_current_year],
-                                         null=False, blank=False, verbose_name=_('Published Date'))
+    published_year = models.IntegerField(validators=[MinValueValidator(1800), max_value_current_year],
+                                         null=False, blank=False, verbose_name=_('Published Year'))
     stock = models.PositiveIntegerField(default=0, verbose_name=_('Stock'), help_text=_('Number of books'))
-    image_link = models.CharField(max_length=200, null=True, blank=True, verbose_name=_('Image'))
+    image_link = models.CharField(max_length=200, null=True, blank=True, verbose_name=_('Image Link'))
 
     class Meta:
         verbose_name = _("Book")
