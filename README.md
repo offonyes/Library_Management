@@ -48,7 +48,7 @@ py manage.py migrate
 ```
 4. Create SuperUser:
 ```shell
-py manage.py migrate
+py manage.py createsuperuser
 ```
 5. Generate DataBase:
 ```shell
