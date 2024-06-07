@@ -4,6 +4,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 
 from library_app.models import BooksBorrow
+from library_app.choice import BorrowStatus
 
 
 class Command(BaseCommand):
@@ -12,12 +13,12 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         now = timezone.now() - timezone.timedelta(days=14)
         expired_borrows = BooksBorrow.objects.filter(
-            borrowed_status='borrowed',
+            borrowed_status=BorrowStatus.BORROWED,
             borrowed_date__lt=now
         )
 
         for borrow in expired_borrows:
-            borrow.borrowed_status = 'overdue'
+            borrow.borrowed_status = BorrowStatus.OVERDUE
 
             subject = 'Your borrowed book is overdue'
             message = (f'Dear {borrow.borrower.first_name} {borrow.borrower.last_name},\n\nYour borrowed book'

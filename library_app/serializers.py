@@ -66,6 +66,8 @@ class BorrowCountLastYearSerializer(serializers.ModelSerializer):
 
 
 class BookReservationSerializer(serializers.ModelSerializer):
+    reservation_status = serializers.CharField(source='get_reservation_status_display', read_only=True)
+
     class Meta:
         model = BookReservation
         read_only_fields = ['expiration_date', 'reservation_status']
@@ -74,6 +76,8 @@ class BookReservationSerializer(serializers.ModelSerializer):
 
 
 class CreateBookReservationSerializer(serializers.ModelSerializer):
+    reservation_status = serializers.CharField(source='get_reservation_status_display', read_only=True)
+
     class Meta:
         model = BookReservation
         read_only_fields = ['expiration_date', 'reservation_status']
@@ -81,6 +85,8 @@ class CreateBookReservationSerializer(serializers.ModelSerializer):
 
 
 class BooksBorrowSerializer(serializers.ModelSerializer):
+    borrowed_status = serializers.CharField(source='get_borrowed_status_display', read_only=True)
+
     class Meta:
         model = BooksBorrow
         depth = 1

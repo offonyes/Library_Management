@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-from library_app.choice import BORROWS_STATUS_TYPE, RESERVATION_STATUS_TYPE
+from library_app.choice import BorrowStatus, ReservationStatus
 
 
 class Genre(models.Model):
@@ -72,8 +72,8 @@ class BookReservation(models.Model):
                                          help_text=_('Creates automatically'))
     expiration_date = models.DateTimeField(null=True, blank=True, verbose_name=_('Expiration Date'),
                                            help_text=_('Date/time when reservation expires'))
-    reservation_status = models.CharField(max_length=50, choices=RESERVATION_STATUS_TYPE, default='reserved',
-                                          verbose_name=_('Reservation Status'))
+    reservation_status = models.IntegerField(choices=ReservationStatus, default=ReservationStatus.RESERVED,
+                                             verbose_name=_('Reservation Status'))
 
     class Meta:
         verbose_name = _("Book Reservation")
@@ -81,7 +81,7 @@ class BookReservation(models.Model):
         ordering = ['-reserved_date']
 
     def save(self, *args, **kwargs):
-        if not self.expiration_date and self.reservation_status == 'reserved':
+        if not self.expiration_date and self.reservation_status == ReservationStatus.RESERVED:
             self.expiration_date = timezone.now() + timezone.timedelta(days=1)
         super().save(*args, **kwargs)
 
@@ -90,14 +90,14 @@ class BookReservation(models.Model):
 
     @transaction.atomic
     def process_pickup(self):
-        if self.reservation_status == 'reserved':
-            self.reservation_status = 'picked_up'
+        if self.reservation_status == ReservationStatus.RESERVED:
+            self.reservation_status = ReservationStatus.PICKED_UP
             self.save()
 
             borrow = BooksBorrow.objects.create(
                 book=self.book,
                 borrower=self.borrower,
-                borrowed_status='borrowed'
+                borrowed_status=BorrowStatus.BORROWED
             )
 
             self.borrow = borrow
@@ -110,8 +110,8 @@ class BooksBorrow(models.Model):
                                  on_delete=models.CASCADE)
     borrowed_date = models.DateTimeField(auto_now_add=True, verbose_name=_('Borrowed Date'),
                                          help_text=_('Creates automatically'))
-    borrowed_status = models.CharField(max_length=50, choices=BORROWS_STATUS_TYPE, default='borrowed',
-                                       verbose_name=_('Borrowed Status'))
+    borrowed_status = models.IntegerField(choices=BorrowStatus, default=BorrowStatus.BORROWED,
+                                          verbose_name=_('Borrowed Status'))
     return_date = models.DateTimeField(null=True, blank=True, verbose_name=_('Return Date'),
                                        help_text=_('Date/time of returning borrowed book'))
 
