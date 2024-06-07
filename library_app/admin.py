@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from django_admin_inline_paginator.admin import TabularInlinePaginated
 
+from library_app.choice import ReservationStatus, BorrowStatus
 from library_app.forms import BookReservationForm, BooksBorrowForm
 from library_app.models import Book, Author, Genre, BooksBorrow, BookReservation
 from library_app.filters import AuthorsFilter, GenresFilter, BooksFilter, BorrowersFilter
@@ -61,11 +62,12 @@ class BookAdmin(admin.ModelAdmin):
 
         qs = qs.annotate(
             borrowed_books=Count('borrows', filter=Q(
-                borrows__borrowed_status__in=['borrowed', 'overdue']), distinct=True),
+                borrows__borrowed_status__in=[BorrowStatus.BORROWED, BorrowStatus.OVERDUE]), distinct=True),
             borrowed_count=Count('borrows', filter=Q(
-                borrows__borrowed_status__in=['borrowed', 'returned', 'overdue', 'overdue_returned']), distinct=True),
+                borrows__borrowed_status__in=[BorrowStatus.BORROWED, BorrowStatus.RETURNED,
+                                              BorrowStatus.OVERDUE, BorrowStatus.OVERDUE_RETURNED]), distinct=True),
             reservation_books=Count('reservations', filter=Q(
-                reservations__reservation_status='reserved'), distinct=True),
+                reservations__reservation_status=ReservationStatus.RESERVED), distinct=True),
         ).order_by('-borrowed_count', '-reservation_books')
 
         return qs
@@ -109,7 +111,7 @@ class BookReservationAdmin(admin.ModelAdmin):
 
     def mark_as_picked_up(self, request, queryset):
         for reservation in queryset:
-            if reservation.reservation_status == 'reserved':
+            if reservation.reservation_status == ReservationStatus.RESERVED:
                 reservation.process_pickup()
         self.message_user(request, "Selected reservations have been marked as picked up and borrow records created.")
 
@@ -118,11 +120,11 @@ class BookReservationAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         if change:
             previous_status = BookReservation.objects.get(pk=obj.pk).reservation_status
-            if previous_status != 'picked_up' and obj.reservation_status == 'picked_up':
+            if previous_status != ReservationStatus.PICKED_UP and obj.reservation_status == ReservationStatus.PICKED_UP:
                 BooksBorrow.objects.create(
                     book=obj.book,
                     borrower=obj.borrower,
-                    borrowed_status='borrowed'
+                    borrowed_status=BorrowStatus.BORROWED
                 )
                 self.message_user(request, "Selected reservation have been marked as picked"
                                            " up and borrow records created.")
@@ -151,6 +153,6 @@ class BooksBorrowAdmin(admin.ModelAdmin):
             'book', 'borrower')
 
     def save_model(self, request, obj, form, change):
-        if obj.borrowed_status in ['returned', 'overdue_returned']:
+        if obj.borrowed_status in [BorrowStatus.RETURNED, BorrowStatus.OVERDUE_RETURNED]:
             obj.return_date = timezone.now()
         super().save_model(request, obj, form, change)
