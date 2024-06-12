@@ -142,12 +142,10 @@ class BookReservationView(viewsets.ModelViewSet):
         if book is None:
             raise serializers.ValidationError({'error': 'This book does not exist'})
 
-        if (BookReservation.objects.filter(borrower=user, book=book, reservation_status=ReservationStatus.RESERVED)
-                .exists()):
+        if user.reservations.filter(book=book, reservation_status=ReservationStatus.RESERVED).exists():
             raise serializers.ValidationError({'detail': 'You have already reserved this book.'}, code='invalid')
-        
-        if (BooksBorrow.objects.filter(borrower=user, book=book, borrowed_status__in=[BorrowStatus.BORROWED, BorrowStatus.OVERDUE])
-                .exists()):
+
+        if user.borrows.filter(book=book, borrowed_status__in=[BorrowStatus.BORROWED, BorrowStatus.OVERDUE]).exists():
             raise serializers.ValidationError({'detail': 'You have already borrowed this book.'}, code='invalid')
 
         if user.borrows.filter(borrowed_status__in=[BorrowStatus.BORROWED, BorrowStatus.OVERDUE]).count() >= 5:
@@ -176,12 +174,6 @@ class BookReservationView(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], url_path='cancel')
     def cancel(self, request, pk=None):
         reservation = self.get_object()
-
-        # Can delete this !!!
-        # if reservation.reservation_status in ['picked_up', 'reservation_expired', 'reservation_canceled']:
-        #     return Response({'error': 'Reservation is already cancelled or has expired.'},
-        #                     status=status.HTTP_400_BAD_REQUEST)
-
         reservation.reservation_status = ReservationStatus.RESERVATION_CANCELED
         reservation.save()
         return Response({'message': 'Reservation cancelled successfully'}, status=status.HTTP_200_OK)
@@ -200,13 +192,20 @@ class BookReservationView(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], url_path='add_wishlist')
     def add_wishlist(self, request):
+        user = self.request.user
         try:
             book = Book.objects.get(pk=request.data['book'])
         except Book.DoesNotExist:
             raise serializers.ValidationError({'detail': 'This book does not exist'}, code='invalid')
 
+        if user.reservations.filter(book=book, reservation_status=ReservationStatus.RESERVED).exists():
+            raise serializers.ValidationError({'detail': 'You have already reserved this book.'}, code='invalid')
+
+        if user.borrows.filter(book=book, borrowed_status__in=[BorrowStatus.BORROWED, BorrowStatus.OVERDUE]).exists():
+            raise serializers.ValidationError({'detail': 'You have already borrowed this book.'}, code='invalid')
+
         wishlist, created = BookReservation.objects.get_or_create(
-            borrower=request.user,
+            borrower=user,
             book=book,
             reservation_status=ReservationStatus.WISHLIST,
         )

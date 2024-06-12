@@ -3,6 +3,7 @@ from django.contrib.admin import DateFieldListFilter
 from django.db.models import Count, Q
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+from django.contrib.auth.models import Group
 
 from django_admin_inline_paginator.admin import TabularInlinePaginated
 
@@ -10,6 +11,9 @@ from library_app.choice import ReservationStatus, BorrowStatus
 from library_app.forms import BookReservationForm, BooksBorrowForm
 from library_app.models import Book, Author, Genre, BooksBorrow, BookReservation
 from library_app.filters import AuthorsFilter, GenresFilter, BooksFilter, BorrowersFilter
+
+
+admin.site.unregister(Group)
 
 
 @admin.register(Genre)
@@ -43,7 +47,8 @@ class BooksInline(TabularInlinePaginated):
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
     inlines = [BooksInline]
-    list_display = ['title', 'published_year', 'stock', 'borrowed_books', 'reservation_books', 'borrowed_count']
+    list_display = ['title', 'get_genres', 'get_authors', 'published_year', 'stock', 'borrowed_books',
+                    'reservation_books', 'borrowed_count']
     readonly_fields = ['borrowed_books', 'reservation_books', 'borrowed_count']
     autocomplete_fields = ['authors', 'genres']
     list_filter = [AuthorsFilter, GenresFilter]
@@ -58,7 +63,7 @@ class BookAdmin(admin.ModelAdmin):
     )
 
     def get_queryset(self, request):
-        qs = super(BookAdmin, self).get_queryset(request).prefetch_related('genres', 'authors')
+        qs = super(BookAdmin, self).get_queryset(request).prefetch_related('authors', 'genres')
 
         qs = qs.annotate(
             borrowed_books=Count('borrows', filter=Q(
@@ -72,20 +77,31 @@ class BookAdmin(admin.ModelAdmin):
 
         return qs
 
+    def get_genres(self, obj):
+        return ", ".join([genre.name for genre in obj.genres.all()])
+    get_genres.short_description = 'Genres'
+
+    def get_authors(self, obj):
+        return ", ".join([author.name for author in obj.authors.all()])
+    get_authors.short_description = 'Authors'
+
     def borrowed_books(self, obj):
         return obj.borrowed_books
 
-    borrowed_books.short_description = 'Now Borrowed Books'
+    borrowed_books.short_description = 'Currently Borrowed Counts'
+    borrowed_books.admin_order_field = 'borrowed_books'
 
     def reservation_books(self, obj):
         return obj.reservation_books
 
-    reservation_books.short_description = 'Reservation Books'
+    reservation_books.short_description = 'Active Reservation Counts'
+    reservation_books.admin_order_field = 'reservation_books'
 
     def borrowed_count(self, obj):
         return obj.borrowed_count
 
-    borrowed_count.short_description = 'Borrowed Books Counts'
+    borrowed_count.short_description = 'Total Borrowed Counts'
+    borrowed_count.admin_order_field = 'borrowed_count'
 
 
 @admin.register(BookReservation)
@@ -105,6 +121,8 @@ class BookReservationAdmin(admin.ModelAdmin):
     readonly_fields = ['reserved_date', 'expiration_date']
     autocomplete_fields = ['book', 'borrower']
     actions = ['mark_as_picked_up']
+    date_hierarchy = 'reserved_date'
+    list_per_page = 25
 
     def get_queryset(self, request):
         return super(BookReservationAdmin, self).get_queryset(request).select_related('book', 'borrower')
@@ -147,6 +165,8 @@ class BooksBorrowAdmin(admin.ModelAdmin):
     list_filter = [BooksFilter, BorrowersFilter, ('borrowed_date', DateFieldListFilter), 'borrowed_status']
     readonly_fields = ['borrowed_date']
     autocomplete_fields = ['book', 'borrower']
+    date_hierarchy = 'borrowed_date'
+    list_per_page = 25
 
     def get_queryset(self, request):
         return super(BooksBorrowAdmin, self).get_queryset(request).select_related(
